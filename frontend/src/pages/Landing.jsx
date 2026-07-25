@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
+import '../styles/Landing.css'
 
 function Landing() {
   const [formData, setFormData] = useState({
@@ -20,12 +23,7 @@ function Landing() {
 
   return (
     <div className="landing-page">
-      <header className="topbar">
-        <div className="brand">Renton</div>
-        <a className="nav-link" href="#signup">
-          Sign up
-        </a>
-      </header>
+      <Navbar />
 
       <main className="hero-section">
         <section className="hero-copy">
@@ -57,15 +55,15 @@ function Landing() {
           <div className="tool-list">
             <div className="tool-item">
               <span>Drill kit</span>
-              <strong>From $8/day</strong>
+              <strong>From ₹8/day</strong>
             </div>
             <div className="tool-item">
               <span>Paint sprayer</span>
-              <strong>From $12/day</strong>
+              <strong>From ₹12/day</strong>
             </div>
             <div className="tool-item">
               <span>Angle grinder</span>
-              <strong>From $10/day</strong>
+              <strong>From ₹10/day</strong>
             </div>
           </div>
         </aside>
