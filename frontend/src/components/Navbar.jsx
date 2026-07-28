@@ -1,32 +1,71 @@
 import { Link } from "react-router-dom";
-import "./Navbar.css";
 
-function Navbar() {
+export default function Navbar() {
   return (
-    <header className="navbar">
-      <div className="logo">
-        <Link to="/">Renton</Link>
-      </div>
+    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-emerald-100 shadow-lg shadow-emerald-100/50 transition-all duration-500">
+      <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-8 lg:px-12">
 
-      <nav className="nav-links">
-        <Link to="/">Home</Link>
-        <Link to="/tools">Tools</Link>
-        <Link to="/categories">Categories</Link>
-        <Link to="/about">About</Link>
-        <Link to="/contact">Contact</Link>
-      </nav>
+        {/* Logo */}
+        <Link
+          to="/"
+          className="group flex items-center gap-4 transition-all duration-300"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-700 text-2xl font-bold text-white shadow-lg shadow-emerald-300 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
+            R
+          </div>
 
-      <div className="nav-buttons">
-        <Link to="/login" className="login-btn">
-          Sign In
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight text-emerald-700 transition-colors duration-300 group-hover:text-emerald-600">
+              Renton
+            </h1>
+
+            <p className="text-sm text-slate-500">
+              Equipment Rental System
+            </p>
+          </div>
         </Link>
 
-        <Link to="/signup" className="signup-btn">
-          Sign Up
-        </Link>
+        {/* Navigation */}
+        <div className="hidden items-center gap-10 lg:flex">
+          {[
+            "Home",
+            "Equipment",
+            "Categories",
+            "About",
+            "Contact",
+            "Feedback",
+          ].map((item) => (
+            <Link
+              key={item}
+              to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
+              className="group relative text-lg font-semibold text-slate-700 transition-all duration-300 hover:text-emerald-600"
+            >
+              {item}
+
+              <span className="absolute -bottom-2 left-0 h-[3px] w-0 rounded-full bg-emerald-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center gap-5">
+
+          <Link
+            to="/login"
+            className="rounded-xl border-2 border-emerald-600 px-6 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-200"
+          >
+            Sign In
+          </Link>
+
+          <Link
+            to="/register"
+            className="rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 px-7 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-300 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:shadow-xl hover:shadow-emerald-400"
+          >
+            Get Started
+          </Link>
+
+        </div>
       </div>
-    </header>
+    </nav>
   );
 }
-
-export default Navbar;
