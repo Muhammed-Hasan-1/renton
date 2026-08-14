@@ -1,6 +1,6 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-
+// import Navbar from "../components/Navbar";
+// import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
 export default function Landing() {
   const categories = [
     "Power Tools",
@@ -55,13 +55,19 @@ export default function Landing() {
             </p>
 
             <div className="flex gap-5">
-              <button className="rounded-xl bg-emerald-600 px-8 py-4 text-lg font-semibold text-white transition hover:scale-105 hover:bg-emerald-700">
+              <Link
+                to="/equipment"
+                className="rounded-xl bg-emerald-600 px-8 py-4 text-lg font-semibold text-white transition hover:scale-105 hover:bg-emerald-700"
+              >
                 Browse Equipment
-              </button>
+              </Link>
 
-              <button className="rounded-xl border-2 border-emerald-600 px-8 py-4 text-lg font-semibold text-emerald-700 transition hover:bg-emerald-100">
+              <Link
+                to="/signup"
+                className="rounded-xl border-2 border-emerald-600 px-8 py-4 text-lg font-semibold text-emerald-700 transition hover:bg-emerald-100"
+              >
                 Become a Lender
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -155,10 +161,12 @@ export default function Landing() {
                     {item.price}
                   </p>
 
-                  <button className="mt-6 w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700">
+                  <Link
+                    to="/equipment"
+                    className="mt-6 block w-full rounded-xl bg-emerald-600 py-3 text-center font-semibold text-white transition hover:bg-emerald-700"
+                  >
                     Rent Now
-                  </button>
-
+                  </Link>
                 </div>
               </div>
             ))}
@@ -227,10 +235,12 @@ export default function Landing() {
           Browse hundreds of professional tools and equipment today.
         </p>
 
-        <button className="mt-10 rounded-xl bg-white px-10 py-4 text-lg font-semibold text-emerald-700 transition hover:scale-105">
+        <Link
+          to="/signup"
+          className="mt-10 inline-block rounded-xl bg-white px-10 py-4 text-lg font-semibold text-emerald-700 transition hover:scale-105"
+        >
           Get Started
-        </button>
-
+        </Link>
       </section>
 
     </>

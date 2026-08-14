@@ -1,8 +1,17 @@
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "Equipment", path: "/equipment" },
+    { name: "Categories", path: "/categories" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+    { name: "Feedback", path: "/feedback" },
+  ];
+
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-emerald-100 shadow-lg shadow-emerald-100/50 transition-all duration-500">
+    <nav className="sticky top-0 z-50 w-full border-b border-emerald-100 bg-white/90 shadow-lg shadow-emerald-100/50 backdrop-blur-xl">
       <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-8 lg:px-12">
 
         {/* Logo */}
@@ -27,44 +36,38 @@ export default function Navbar() {
 
         {/* Navigation */}
         <div className="hidden items-center gap-10 lg:flex">
-          {[
-            "Home",
-            "Equipment",
-            "Categories",
-            "About",
-            "Contact",
-            "Feedback",
-          ].map((item) => (
+          {navItems.map((item) => (
             <Link
-              key={item}
-              to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
+              key={item.name}
+              to={item.path}
               className="group relative text-lg font-semibold text-slate-700 transition-all duration-300 hover:text-emerald-600"
             >
-              {item}
+              {item.name}
 
               <span className="absolute -bottom-2 left-0 h-[3px] w-0 rounded-full bg-emerald-600 transition-all duration-300 group-hover:w-full"></span>
             </Link>
           ))}
         </div>
 
-        {/* Buttons */}
+        {/* Authentication Buttons */}
         <div className="flex items-center gap-5">
 
           <Link
-            to="/login"
+            to="/signin"
             className="rounded-xl border-2 border-emerald-600 px-6 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-200"
           >
             Sign In
           </Link>
 
           <Link
-            to="/register"
+            to="/signup"
             className="rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 px-7 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-300 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:shadow-xl hover:shadow-emerald-400"
           >
             Get Started
           </Link>
 
         </div>
+
       </div>
     </nav>
   );

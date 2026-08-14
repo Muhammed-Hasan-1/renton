@@ -1,7 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 export default function SignUp() {
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -24,10 +31,63 @@ export default function SignUp() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  setError("");
+  setSuccess("");
+
+  // Check password
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match");
+    return;
+  }
+
+  // Check password length
+  if (formData.password.length < 6) {
+    setError("Password must be at least 6 characters");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await axios.post(
+      "http://localhost:5000/api/auth/register",
+      {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+
+        address1: formData.address1,
+        address2: formData.address2,
+        state: formData.state,
+        district: formData.district,
+        city: formData.city,
+        pincode: formData.pincode,
+
+        password: formData.password,
+        role: formData.role,
+      }
+    );
+
+    setSuccess(response.data.message);
+
+    // Move to Sign In after successful registration
+    setTimeout(() => {
+      navigate("/signin");
+    }, 1500);
+
+  } catch (error) {
+    setError(
+      error.response?.data?.message ||
+      "Registration failed. Please try again."
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-lime-50 flex items-center justify-center px-6 py-20">
@@ -309,15 +369,26 @@ export default function SignUp() {
                 I agree to the Terms & Conditions and Privacy Policy.
               </span>
             </label>
+{error && (
+  <div className="rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">
+    {error}
+  </div>
+)}
 
+{success && (
+  <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
+    {success}
+  </div>
+)}
             {/* Button */}
 
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-emerald-600 py-4 text-lg font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-700 hover:shadow-xl"
-            >
-              Create Account
-            </button>
+<button
+  type="submit"
+  disabled={loading}
+  className="w-full rounded-xl bg-emerald-600 py-4 text-lg font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+>
+  {loading ? "Creating Account..." : "Create Account"}
+</button>
 
           </form>
 
