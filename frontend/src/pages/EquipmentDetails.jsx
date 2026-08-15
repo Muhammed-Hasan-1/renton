@@ -1,129 +1,188 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
-const equipments = [
-  {
-    id: 1,
-    name: "Cordless Drill",
-    category: "Power Tools",
-    price: 300,
-    location: "Kochi",
-    image:
-      "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=900",
-    description:
-      "A powerful cordless drill suitable for home repairs, furniture work and DIY projects.",
-  },
-  {
-    id: 2,
-    name: "Angle Grinder",
-    category: "Power Tools",
-    price: 250,
-    location: "Kochi",
-    image:
-      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=900",
-    description:
-      "Reliable angle grinder for cutting, grinding and polishing different materials.",
-  },
-  {
-    id: 3,
-    name: "Circular Saw",
-    category: "Construction",
-    price: 350,
-    location: "Ernakulam",
-    image:
-      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=900",
-    description:
-      "Professional circular saw suitable for wood cutting and construction projects.",
-  },
-];
+import axios from "axios";
 
 function EquipmentDetails() {
   const { id } = useParams();
 
-  const equipment = equipments.find(
-    (item) => item.id === Number(id)
-  );
+  const [equipment, setEquipment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!equipment) {
+  useEffect(() => {
+    const fetchEquipment = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axios.get(
+          `http://localhost:5000/api/equipment/${id}`
+        );
+
+        setEquipment(response.data);
+      } catch (error) {
+        console.error("Failed to load equipment:", error);
+
+        setError(
+          error.response?.data?.message ||
+            "Unable to load equipment details."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEquipment();
+  }, [id]);
+
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen py-20 text-center">
-        <h1 className="text-3xl font-bold">
-          Equipment not found
-        </h1>
+      <div className="min-h-screen bg-slate-50 py-20">
+        <div className="mx-auto max-w-5xl px-8 text-center">
+          <div className="text-5xl">⏳</div>
 
-        <Link
-          to="/equipment"
-          className="mt-6 inline-block rounded-xl bg-emerald-600 px-6 py-3 text-white"
-        >
-          Back to Equipment
-        </Link>
+          <h1 className="mt-5 text-3xl font-bold text-slate-800">
+            Loading equipment...
+          </h1>
+
+          <p className="mt-3 text-slate-500">
+            Please wait while we load the equipment details.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !equipment) {
+    return (
+      <div className="min-h-screen bg-slate-50 py-20">
+        <div className="mx-auto max-w-5xl px-8 text-center">
+          <div className="text-5xl">⚠️</div>
+
+          <h1 className="mt-5 text-3xl font-bold text-slate-800">
+            Equipment not found
+          </h1>
+
+          <p className="mt-3 text-red-500">
+            {error || "The requested equipment could not be found."}
+          </p>
+
+          <Link
+            to="/equipment"
+            className="mt-8 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700"
+          >
+            Back to Equipment
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 py-16">
-
       <div className="mx-auto max-w-6xl px-8">
 
+        {/* Back button */}
         <Link
           to="/equipment"
-          className="font-semibold text-emerald-600"
+          className="mb-8 inline-flex items-center font-semibold text-emerald-600 hover:text-emerald-700"
         >
           ← Back to Equipment
         </Link>
 
-        <div className="mt-8 grid overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
+        {/* Details Card */}
+        <div className="grid overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
 
-          <img
-            src={equipment.image}
-            alt={equipment.name}
-            className="h-full min-h-[450px] w-full object-cover"
-          />
+          {/* Image */}
+          <div className="bg-slate-100">
+            <img
+              src={equipment.image}
+              alt={equipment.name}
+              className="h-full min-h-[450px] w-full object-cover"
+            />
+          </div>
 
-          <div className="p-10">
+          {/* Information */}
+          <div className="p-8 md:p-10">
 
-            <p className="font-semibold text-emerald-600">
+            {/* Category */}
+            <p className="font-semibold uppercase tracking-wide text-emerald-600">
               {equipment.category}
             </p>
 
+            {/* Name */}
             <h1 className="mt-3 text-4xl font-bold text-slate-800">
               {equipment.name}
             </h1>
 
-            <p className="mt-4 text-slate-500">
+            {/* Location */}
+            <p className="mt-5 text-slate-500">
               📍 {equipment.location}
             </p>
 
-            <div className="my-8 border-t border-slate-200" />
+            {/* Price */}
+            <div className="mt-8">
+              <p className="text-sm font-medium text-slate-500">
+                Rental price
+              </p>
 
-            <p className="text-3xl font-bold text-emerald-600">
-              ₹{equipment.price}
-              <span className="text-base font-normal text-slate-500">
-                {" "}
-                / day
-              </span>
-            </p>
+              <p className="mt-1 text-3xl font-bold text-emerald-600">
+                ₹{equipment.pricePerDay}
+                <span className="text-base font-medium text-slate-500">
+                  /day
+                </span>
+              </p>
+            </div>
 
-            <h2 className="mt-8 text-xl font-bold">
-              Description
-            </h2>
+            {/* Availability */}
+            <div className="mt-6">
+              {equipment.available ? (
+                <span className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+                  ✓ Available for rent
+                </span>
+              ) : (
+                <span className="inline-flex rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-700">
+                  Currently unavailable
+                </span>
+              )}
+            </div>
 
-            <p className="mt-3 leading-7 text-slate-600">
-              {equipment.description}
-            </p>
+            {/* Description */}
+            <div className="mt-8 border-t border-slate-200 pt-8">
+              <h2 className="text-xl font-bold text-slate-800">
+                About this equipment
+              </h2>
 
-            <button
-              className="mt-10 w-full rounded-xl bg-emerald-600 py-4 text-lg font-semibold text-white transition hover:bg-emerald-700"
-            >
-              Rent Now
-            </button>
+              <p className="mt-3 leading-7 text-slate-600">
+                {equipment.description}
+              </p>
+            </div>
+
+            {/* Rent button */}
+            <div className="mt-8">
+              {equipment.available ? (
+                <Link
+                  to={`/equipment/${equipment._id}/rent`}
+                  className="block w-full rounded-xl bg-emerald-600 py-4 text-center font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Rent Now
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="w-full cursor-not-allowed rounded-xl bg-slate-300 py-4 font-semibold text-slate-500"
+                >
+                  Currently Unavailable
+                </button>
+              )}
+            </div>
 
           </div>
-
         </div>
 
       </div>
-
     </div>
   );
 }

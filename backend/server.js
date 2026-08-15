@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const Test = require("./models/Test");
+const equipmentRoutes = require("./routes/equipmentRoutes");
+const rentalRoutes = require("./routes/rentalRoutes");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
@@ -14,6 +16,8 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/equipment", equipmentRoutes);
+app.use("/api/rentals", rentalRoutes);
 
 // MongoDB connection
 mongoose

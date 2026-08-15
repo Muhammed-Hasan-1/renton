@@ -23,6 +23,8 @@ import Maintenance from "./pages/Maintenance";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 
+import RentEquipment from "./pages/RentEquipment";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -33,10 +35,7 @@ function App() {
       <Navbar />
 
       <Routes>
-        <Route
-          path="/equipment/:id"
-          element={<EquipmentDetails />}
-        />
+        <Route path="/equipment/:id" element={<EquipmentDetails />} />
         <Route path="/" element={<Landing />} />
         <Route path="/equipment" element={<Equipment />} />
         <Route path="/categories" element={<Categories />} />
@@ -50,14 +49,9 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/booking" element={<Booking />} />
         <Route path="/inventory" element={<Inventory />} />
-        <Route
-          path="/rental-history"
-          element={<RentalHistory />}
-        />
-        <Route
-          path="/maintenance"
-          element={<Maintenance />}
-        />
+        <Route path="/rental-history" element={<RentalHistory />} />
+        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/equipment/:id/rent" element={<RentEquipment />} />
       </Routes>
 
       <Footer />

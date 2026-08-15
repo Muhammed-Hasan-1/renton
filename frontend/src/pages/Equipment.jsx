@@ -1,74 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
-const equipments = [
-  {
-    id: 1,
-    name: "Cordless Drill",
-    category: "Power Tools",
-    price: 300,
-    location: "Kochi",
-    image:
-      "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600",
-    description:
-      "A powerful cordless drill suitable for home repairs, furniture work and DIY projects.",
-  },
-  {
-    id: 2,
-    name: "Angle Grinder",
-    category: "Power Tools",
-    price: 250,
-    location: "Kochi",
-    image:
-      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600",
-    description:
-      "Reliable angle grinder for cutting, grinding and polishing different materials.",
-  },
-  {
-    id: 3,
-    name: "Circular Saw",
-    category: "Construction",
-    price: 350,
-    location: "Ernakulam",
-    image:
-      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600",
-    description:
-      "Professional circular saw suitable for wood cutting and construction projects.",
-  },
-  {
-    id: 4,
-    name: "Pressure Washer",
-    category: "Cleaning",
-    price: 450,
-    location: "Kochi",
-    image:
-      "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=600",
-    description:
-      "High-pressure cleaning equipment for vehicles, floors and outdoor areas.",
-  },
-  {
-    id: 5,
-    name: "Lawn Mower",
-    category: "Gardening",
-    price: 500,
-    location: "Aluva",
-    image:
-      "https://images.unsplash.com/photo-1599685315640-4e6e0f4d6a4f?w=600",
-    description:
-      "Efficient lawn mower for maintaining gardens and outdoor spaces.",
-  },
-  {
-    id: 6,
-    name: "Paint Sprayer",
-    category: "Painting",
-    price: 400,
-    location: "Thrissur",
-    image:
-      "https://images.unsplash.com/photo-1562259949-e8e768c9f3f5?w=600",
-    description:
-      "Easy-to-use paint sprayer for walls, furniture and large painting projects.",
-  },
-];
+
 
 const categories = [
   "All Categories",
@@ -81,9 +15,41 @@ const categories = [
 ];
 
 function Equipment() {
+  const [equipments, setEquipments] = useState([]);
+
   const [search, setSearch] = useState("");
+
   const [category, setCategory] = useState("All Categories");
 
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
+    useEffect(() => {
+    const fetchEquipment = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axios.get(
+          "http://localhost:5000/api/equipment"
+        );
+
+        setEquipments(response.data);
+
+      } catch (error) {
+        console.error("Failed to load equipment:", error);
+
+        setError(
+          "Unable to load equipment. Please try again."
+        );
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEquipment();
+  }, []);
   const filteredEquipment = useMemo(() => {
     return equipments.filter((equipment) => {
       const matchesSearch =
@@ -97,7 +63,7 @@ function Equipment() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [search, category]);
+  }, [equipments, search, category]);
 
   return (
     <div className="min-h-screen bg-slate-50 py-16">
@@ -178,7 +144,7 @@ function Equipment() {
             {filteredEquipment.map((equipment) => (
 
               <div
-                key={equipment.id}
+                key={equipment._id}
                 className="overflow-hidden rounded-3xl bg-white shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
               >
 
@@ -203,11 +169,11 @@ function Equipment() {
                   </p>
 
                   <p className="mt-4 text-xl font-bold text-emerald-600">
-                    ₹{equipment.price}/day
+                    ₹{equipment.pricePerDay}/day
                   </p>
 
                   <Link
-                    to={`/equipment/${equipment.id}`}
+                    to={`/equipment/${equipment._id}`}
                     className="mt-6 block w-full rounded-xl bg-emerald-600 py-3 text-center font-semibold text-white transition hover:bg-emerald-700"
                   >
                     View Details
