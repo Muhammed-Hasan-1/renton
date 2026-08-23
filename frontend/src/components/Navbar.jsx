@@ -1,6 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+  const navigate = useNavigate();
+
+  // Check whether the user is logged in
+  const isLoggedIn = !!localStorage.getItem("rentonToken");
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("rentonToken");
+    localStorage.removeItem("rentonUser");
+
+    navigate("/");
+    window.location.reload();
+  };
+
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Equipment", path: "/equipment" },
@@ -52,19 +66,46 @@ export default function Navbar() {
         {/* Authentication Buttons */}
         <div className="flex items-center gap-5">
 
-          <Link
-            to="/signin"
-            className="rounded-xl border-2 border-emerald-600 px-6 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-200"
-          >
-            Sign In
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link
+                to="/dashboard"
+                className="rounded-xl border-2 border-emerald-600 px-5 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg"
+              >
+                Dashboard
+              </Link>
 
-          <Link
-            to="/signup"
-            className="rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 px-7 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-300 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:shadow-xl hover:shadow-emerald-400"
-          >
-            Get Started
-          </Link>
+              <Link
+                to="/profile"
+                className="rounded-xl bg-emerald-100 px-5 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-200"
+              >
+                My Profile
+              </Link>
+
+              <button
+                onClick={handleLogout}
+                className="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-5 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/signin"
+                className="rounded-xl border-2 border-emerald-600 px-6 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-200"
+              >
+                Sign In
+              </Link>
+
+              <Link
+                to="/signup"
+                className="rounded-xl bg-gradient-to-r from-emerald-600 to-green-700 px-7 py-3 text-lg font-semibold text-white shadow-lg shadow-emerald-300 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:shadow-xl hover:shadow-emerald-400"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
 
         </div>
 
