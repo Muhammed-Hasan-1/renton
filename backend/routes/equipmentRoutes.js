@@ -1,7 +1,34 @@
 const express = require("express");
 const Equipment = require("../models/Equipment");
 
+const {
+  authenticateUser,
+  authorizeOwner,
+} = require("../middleware/authMiddleware");
+
 const router = express.Router();
+
+// GET LOGGED-IN OWNER'S EQUIPMENT
+router.get(
+  "/my-equipment",
+  authenticateUser,
+  authorizeOwner,
+  async (req, res) => {
+    try {
+      const equipment = await Equipment.find({
+        owner: req.user._id,
+      }).sort({ createdAt: -1 });
+
+      res.json(equipment);
+    } catch (error) {
+      console.error("Get my equipment error:", error);
+
+      res.status(500).json({
+        message: "Failed to fetch your equipment",
+      });
+    }
+  }
+);
 
 
 // GET ALL EQUIPMENT

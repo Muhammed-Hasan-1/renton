@@ -1,36 +1,50 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
-  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Check whether the user is logged in
-  const isLoggedIn = !!localStorage.getItem("rentonToken");
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem("rentonToken");
+  });
 
-  // Logout function
-  const handleLogout = () => {
-    localStorage.removeItem("rentonToken");
-    localStorage.removeItem("rentonUser");
-
-    navigate("/");
-    window.location.reload();
-  };
+  // Check authentication whenever the route changes
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("rentonToken"));
+  }, [location.pathname]);
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Equipment", path: "/equipment" },
-    { name: "Categories", path: "/categories" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
-    { name: "Feedback", path: "/feedback" },
+    {
+      name: "Equipment",
+      path: "/equipment",
+    },
+    {
+      name: "Categories",
+      path: "/categories",
+    },
+    {
+      name: "About",
+      path: "/about",
+    },
+    {
+      name: "Contact",
+      path: "/contact",
+    },
+    {
+      name: "Feedback",
+      path: "/feedback",
+    },
   ];
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-emerald-100 bg-white/90 shadow-lg shadow-emerald-100/50 backdrop-blur-xl">
       <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-8 lg:px-12">
 
-        {/* Logo */}
+        {/* =========================
+            LOGO
+        ========================= */}
         <Link
-          to="/"
+          to={isLoggedIn ? "/dashboard" : "/"}
           className="group flex items-center gap-4 transition-all duration-300"
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-700 text-2xl font-bold text-white shadow-lg shadow-emerald-300 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
@@ -48,8 +62,36 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Navigation */}
+        {/* =========================
+            NAVIGATION
+        ========================= */}
         <div className="hidden items-center gap-10 lg:flex">
+
+          {/* Home when logged out */}
+          {!isLoggedIn && (
+            <Link
+              to="/"
+              className="group relative text-lg font-semibold text-slate-700 transition-all duration-300 hover:text-emerald-600"
+            >
+              Home
+
+              <span className="absolute -bottom-2 left-0 h-[3px] w-0 rounded-full bg-emerald-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+          )}
+
+          {/* Dashboard when logged in */}
+          {isLoggedIn && (
+            <Link
+              to="/dashboard"
+              className="group relative text-lg font-semibold text-slate-700 transition-all duration-300 hover:text-emerald-600"
+            >
+              Dashboard
+
+              <span className="absolute -bottom-2 left-0 h-[3px] w-0 rounded-full bg-emerald-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+          )}
+
+          {/* Common navigation items */}
           {navItems.map((item) => (
             <Link
               key={item.name}
@@ -63,33 +105,13 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Authentication Buttons */}
+        {/* =========================
+            RIGHT SIDE BUTTONS
+        ========================= */}
         <div className="flex items-center gap-5">
 
-          {isLoggedIn ? (
-            <>
-              <Link
-                to="/dashboard"
-                className="rounded-xl border-2 border-emerald-600 px-5 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg"
-              >
-                Dashboard
-              </Link>
-
-              <Link
-                to="/profile"
-                className="rounded-xl bg-emerald-100 px-5 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-200"
-              >
-                My Profile
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-5 py-3 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
+          {/* Logged out */}
+          {!isLoggedIn && (
             <>
               <Link
                 to="/signin"
@@ -107,8 +129,17 @@ export default function Navbar() {
             </>
           )}
 
-        </div>
+          {/* Logged in */}
+          {isLoggedIn && (
+            <Link
+              to="/profile"
+              className="rounded-xl bg-emerald-100 px-6 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-200"
+            >
+              My Profile
+            </Link>
+          )}
 
+        </div>
       </div>
     </nav>
   );

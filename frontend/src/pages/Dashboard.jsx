@@ -1,538 +1,256 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import "../styles/Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [rentals, setRentals] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("rentonUser");
+    const storedUser = localStorage.getItem("rentonUser");
     const token = localStorage.getItem("rentonToken");
 
-    if (!savedUser || !token) {
+    if (!token) {
       navigate("/signin");
       return;
     }
 
-    try {
-      setUser(JSON.parse(savedUser));
-    } catch (error) {
-      console.error("Invalid user data:", error);
-
-      localStorage.removeItem("rentonUser");
-      localStorage.removeItem("rentonToken");
-
-      navigate("/signin");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to read logged-in user:", error);
+        localStorage.removeItem("rentonUser");
+        navigate("/signin");
+      }
     }
   }, [navigate]);
-
-  useEffect(() => {
-    const fetchRentals = async () => {
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await axios.get(
-          "http://localhost:5000/api/rentals/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setRentals(response.data);
-      } catch (error) {
-        console.error("Failed to fetch rentals:", error);
-
-        setError(
-          error.response?.data?.message ||
-            "Unable to load your rentals."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRentals();
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("rentonToken");
     localStorage.removeItem("rentonUser");
 
-    navigate("/signin");
+    navigate("/");
   };
 
-  if (!user || loading) {
+  if (!user) {
     return (
-      <div className="dashboard-loading">
-        Loading dashboard...
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-slate-700">
+          Loading Dashboard...
+        </h1>
       </div>
     );
   }
 
-  /*
-   * ==============================
-   * DASHBOARD STATISTICS
-   * ==============================
-   */
-
-  const activeRentals = rentals.filter(
-    (rental) =>
-      rental.status === "confirmed" ||
-      rental.status === "active"
-  ).length;
-
-  const totalRentals = rentals.length;
-
-  const upcomingReturns = rentals.filter((rental) => {
-    if (
-      rental.status === "cancelled" ||
-      rental.status === "completed"
-    ) {
-      return false;
-    }
-
-    return new Date(rental.endDate) >= new Date();
-  }).length;
+  const isOwner = user.role?.toLowerCase() === "owner";
 
   return (
-    <div className="dashboard-page">
-
-      {/* ==============================
-          DASHBOARD HEADER
-      ============================== */}
-
-      <section className="dashboard-header">
-        <div>
-          <p className="dashboard-eyebrow">
-            RENTON DASHBOARD
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <section className="bg-gradient-to-r from-emerald-700 to-green-600 px-6 py-14 text-white">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-sm font-semibold uppercase tracking-wider text-emerald-100">
+            Welcome back
           </p>
 
-          <h1>
-            Welcome back, {user.name}!
+          <h1 className="mt-2 text-4xl font-bold md:text-5xl">
+            Hello, {user.name || "User"}!
           </h1>
 
-          <p>
-            Manage your equipment rentals, bookings and account.
+          <p className="mt-4 max-w-2xl text-lg text-emerald-50">
+            Manage your rentals and explore equipment from your Renton dashboard.
           </p>
         </div>
-
-        <button
-          className="dashboard-logout"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
       </section>
 
-
-      {/* ==============================
-          ACCOUNT SUMMARY
-      ============================== */}
-
-      <section className="dashboard-stats">
-
-        <div className="dashboard-stat-card">
-          <span className="stat-icon">
-            🛠️
-          </span>
-
-          <div>
-            <p>Active Rentals</p>
-            <h2>{activeRentals}</h2>
-          </div>
-        </div>
-
-
-        <div className="dashboard-stat-card">
-          <span className="stat-icon">
-            📦
-          </span>
-
-          <div>
-            <p>Total Rentals</p>
-            <h2>{totalRentals}</h2>
-          </div>
-        </div>
-
-
-        <div className="dashboard-stat-card">
-          <span className="stat-icon">
-            📅
-          </span>
-
-          <div>
-            <p>Upcoming Returns</p>
-            <h2>{upcomingReturns}</h2>
-          </div>
-        </div>
-
-
-        <div className="dashboard-stat-card">
-          <span className="stat-icon">
-            ❤️
-          </span>
-
-          <div>
-            <p>Saved Equipment</p>
-            <h2>0</h2>
-          </div>
-        </div>
-
-      </section>
-
-
-      {/* ==============================
-          ERROR
-      ============================== */}
-
-      {error && (
-        <div
-          style={{
-            marginBottom: "20px",
-            padding: "15px",
-            borderRadius: "12px",
-            background: "#fee2e2",
-            color: "#b91c1c",
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-
-      {/* ==============================
-          MAIN CONTENT
-      ============================== */}
-
-      <section className="dashboard-content">
-
-        {/* ==============================
-            RECENT RENTALS
-        ============================== */}
-
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
+      <main className="mx-auto max-w-7xl px-6 py-10">
+        {/* Account Information */}
+        <section className="mb-10 rounded-3xl bg-white p-8 shadow-sm">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
             <div>
-              <h2>Recent Rentals</h2>
-
-              <p>
-                Your latest equipment rentals.
-              </p>
-            </div>
-
-            <Link to="/equipment">
-              Browse Equipment
-            </Link>
-          </div>
-
-
-          {rentals.length === 0 ? (
-
-            <div className="empty-rentals">
-
-              <div className="empty-icon">
-                🛠️
-              </div>
-
-              <h3>
-                No rentals yet
-              </h3>
-
-              <p>
-                You haven't rented any equipment yet.
-                Find the right equipment for your next project.
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                Account
               </p>
 
-              <Link
-                to="/equipment"
-                className="dashboard-primary-button"
-              >
-                Browse Equipment
-              </Link>
-
-            </div>
-
-          ) : (
-
-            <div className="rental-list">
-
-              {rentals.slice(0, 5).map((rental) => (
-
-                <div
-                  key={rental._id}
-                  className="rental-card"
-                >
-
-                  {/* Equipment Image */}
-
-                  <img
-                    src={rental.equipment?.image}
-                    alt={
-                      rental.equipment?.name ||
-                      "Equipment"
-                    }
-                    className="rental-image"
-                  />
-
-
-                  {/* Rental Information */}
-
-                  <div className="rental-info">
-
-                    <div className="rental-title-row">
-
-                      <div>
-
-                        <h3>
-                          {rental.equipment?.name ||
-                            "Equipment"}
-                        </h3>
-
-                        <p>
-                          {rental.equipment?.category ||
-                            "Equipment"}
-                        </p>
-
-                      </div>
-
-
-                      <span
-                        className={`rental-status rental-status-${rental.status}`}
-                      >
-                        {rental.status}
-                      </span>
-
-                    </div>
-
-
-                    <div className="rental-details">
-
-                      <div>
-                        <span>📅 Start</span>
-
-                        <strong>
-                          {new Date(
-                            rental.startDate
-                          ).toLocaleDateString()}
-                        </strong>
-                      </div>
-
-
-                      <div>
-                        <span>🔄 Return</span>
-
-                        <strong>
-                          {new Date(
-                            rental.endDate
-                          ).toLocaleDateString()}
-                        </strong>
-                      </div>
-
-
-                      <div>
-                        <span>💰 Total</span>
-
-                        <strong>
-                          ₹{rental.totalAmount}
-                        </strong>
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              ))}
-
-            </div>
-
-          )}
-
-        </div>
-
-
-        {/* ==============================
-            ACCOUNT INFORMATION
-        ============================== */}
-
-        <div className="dashboard-panel">
-
-          <div className="panel-header">
-
-            <div>
-
-              <h2>
-                Account Information
+              <h2 className="mt-2 text-2xl font-bold text-slate-800">
+                {user.name || "Renton User"}
               </h2>
 
-              <p>
-                Your Renton account details.
+              <p className="mt-2 text-slate-500">
+                {user.email}
               </p>
 
+              <p className="mt-3">
+                <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+                  {isOwner ? "Equipment Owner" : "Customer"}
+                </span>
+              </p>
             </div>
 
+            <button
+              onClick={handleLogout}
+              className="rounded-xl border-2 border-red-500 px-6 py-3 font-semibold text-red-600 transition hover:bg-red-50"
+            >
+              Logout
+            </button>
           </div>
+        </section>
 
-
-          <div className="account-details">
-
-            <div className="account-row">
-
-              <span>
-                Name
-              </span>
-
-              <strong>
-                {user.name}
-              </strong>
-
-            </div>
-
-
-            <div className="account-row">
-
-              <span>
-                Email
-              </span>
-
-              <strong>
-                {user.email}
-              </strong>
-
-            </div>
-
-
-            <div className="account-row">
-
-              <span>
-                Role
-              </span>
-
-              <strong>
-
-                {user.role === "owner"
-                  ? "Equipment Owner"
-                  : user.role === "admin"
-                  ? "Administrator"
-                  : "Customer"}
-
-              </strong>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      {/* ==============================
-          QUICK ACTIONS
-      ============================== */}
-
-      <section className="quick-actions">
-
-        <h2>
-          Quick Actions
-        </h2>
-
-
-        <div className="quick-action-grid">
-
+        {/* Dashboard Cards */}
+        <section className="mb-10 grid gap-6 md:grid-cols-3">
           <Link
             to="/equipment"
-            className="quick-action-card"
+            className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
           >
+            <div className="text-4xl">🔧</div>
 
-            <span>
-              🔎
-            </span>
+            <h2 className="mt-5 text-xl font-bold text-slate-800">
+              Browse Equipment
+            </h2>
 
-            <div>
-
-              <h3>
-                Find Equipment
-              </h3>
-
-              <p>
-                Browse available tools and equipment.
-              </p>
-
-            </div>
-
+            <p className="mt-2 text-slate-500">
+              Find tools and equipment available for rent.
+            </p>
           </Link>
-
 
           <Link
-            to="/categories"
-            className="quick-action-card"
+            to="/rental-history"
+            className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
           >
+            <div className="text-4xl">📋</div>
 
-            <span>
-              📂
-            </span>
+            <h2 className="mt-5 text-xl font-bold text-slate-800">
+              Rental History
+            </h2>
 
-            <div>
-
-              <h3>
-                Browse Categories
-              </h3>
-
-              <p>
-                Find equipment by category.
-              </p>
-
-            </div>
-
+            <p className="mt-2 text-slate-500">
+              View your previous and current rentals.
+            </p>
           </Link>
-
 
           <Link
             to="/feedback"
-            className="quick-action-card"
+            className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
           >
+            <div className="text-4xl">💬</div>
 
-            <span>
-              💬
-            </span>
+            <h2 className="mt-5 text-xl font-bold text-slate-800">
+              Feedback
+            </h2>
 
-            <div>
+            <p className="mt-2 text-slate-500">
+              Share your experience and suggestions.
+            </p>
+          </Link>
+        </section>
 
-              <h3>
+        {/* Owner Management */}
+        {isOwner && (
+          <section className="mb-10 rounded-3xl border border-emerald-100 bg-emerald-50 p-8">
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+              <div>
+                <p className="font-semibold text-emerald-600">
+                  OWNER PANEL
+                </p>
+
+                <h2 className="mt-2 text-3xl font-bold text-slate-800">
+                  Manage Your Equipment
+                </h2>
+
+                <p className="mt-3 text-slate-600">
+                  Add new equipment and manage the equipment you have listed
+                  for rent.
+                </p>
+              </div>
+
+              <Link
+                to="/my-equipment"
+                className="rounded-xl bg-emerald-600 px-6 py-3 text-center font-semibold text-white transition hover:bg-emerald-700"
+              >
+                Manage My Equipment
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* Quick Actions */}
+        <section>
+          <div className="mb-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
+              QUICK ACTIONS
+            </p>
+
+            <h2 className="mt-2 text-3xl font-bold text-slate-800">
+              What would you like to do?
+            </h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <Link
+              to="/equipment"
+              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <span className="text-3xl">🔎</span>
+
+              <h3 className="mt-4 text-xl font-bold text-slate-800">
+                Find Equipment
+              </h3>
+
+              <p className="mt-2 text-slate-500">
+                Browse available tools and equipment.
+              </p>
+            </Link>
+
+            {isOwner && (
+              <Link
+                to="/my-equipment"
+                className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <span className="text-3xl">🛠️</span>
+
+                <h3 className="mt-4 text-xl font-bold text-slate-800">
+                  Manage My Equipment
+                </h3>
+
+                <p className="mt-2 text-slate-500">
+                  Add, edit and manage your equipment listings.
+                </p>
+              </Link>
+            )}
+
+            <Link
+              to="/categories"
+              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <span className="text-3xl">📂</span>
+
+              <h3 className="mt-4 text-xl font-bold text-slate-800">
+                Browse Categories
+              </h3>
+
+              <p className="mt-2 text-slate-500">
+                Explore equipment by category.
+              </p>
+            </Link>
+
+            <Link
+              to="/feedback"
+              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            >
+              <span className="text-3xl">💬</span>
+
+              <h3 className="mt-4 text-xl font-bold text-slate-800">
                 Give Feedback
               </h3>
 
-              <p>
-                Tell us about your Renton experience.
+              <p className="mt-2 text-slate-500">
+                Tell us about your experience.
               </p>
-
-            </div>
-
-          </Link>
-
-        </div>
-
-      </section>
-
+            </Link>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
