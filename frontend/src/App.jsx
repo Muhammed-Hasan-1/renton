@@ -31,6 +31,8 @@ import MyEquipment from "./pages/MyEquipment";
 
 import AddEquipment from "./pages/AddEquipment";
 
+import EditEquipment from "./pages/EditEquipment";
+
 function App() {
   return (
     <>
@@ -51,6 +53,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/my-equipment" element={<MyEquipment />} />
         <Route path="/add-equipment" element={<AddEquipment />}/>
+        <Route path="/my-equipment/:id/edit" element={<EditEquipment />}/>
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/booking" element={<Booking />} />

@@ -131,3 +131,76 @@ router.post(
 );
 
 module.exports = router;
+
+// UPDATE EQUIPMENT
+router.put(
+  "/:id",
+  authenticateUser,
+  authorizeOwner,
+  async (req, res) => {
+    try {
+      const {
+        name,
+        description,
+        category,
+        pricePerDay,
+        location,
+        image,
+      } = req.body;
+
+      // Validate required fields
+      if (
+        !name ||
+        !description ||
+        !category ||
+        !pricePerDay ||
+        !location ||
+        !image
+      ) {
+        return res.status(400).json({
+          message: "Please provide all required equipment details",
+        });
+      }
+
+      // Find equipment
+      const equipment = await Equipment.findById(req.params.id);
+
+      if (!equipment) {
+        return res.status(404).json({
+          message: "Equipment not found",
+        });
+      }
+
+      // Make sure this equipment belongs to the logged-in owner
+      if (
+        !equipment.owner ||
+        String(equipment.owner) !== String(req.user._id)
+      ) {
+        return res.status(403).json({
+          message: "You can only edit your own equipment",
+        });
+      }
+
+      // Update equipment
+      equipment.name = name.trim();
+      equipment.description = description.trim();
+      equipment.category = category.trim();
+      equipment.pricePerDay = Number(pricePerDay);
+      equipment.location = location.trim();
+      equipment.image = image.trim();
+
+      await equipment.save();
+
+      res.json({
+        message: "Equipment updated successfully",
+        equipment,
+      });
+    } catch (error) {
+      console.error("Update equipment error:", error);
+
+      res.status(500).json({
+        message: "Failed to update equipment",
+      });
+    }
+  }
+);

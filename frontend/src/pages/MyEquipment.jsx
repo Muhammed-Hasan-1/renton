@@ -166,12 +166,12 @@ function MyEquipment() {
                       View
                     </Link>
 
-                    <button
-                      type="button"
-                      className="flex-1 rounded-xl bg-slate-800 px-4 py-3 font-semibold text-white transition hover:bg-slate-700"
-                    >
-                      Manage
-                    </button>
+<Link
+  to={`/my-equipment/${equipment._id}/edit`}
+  className="flex-1 rounded-xl bg-slate-800 px-4 py-3 text-center font-semibold text-white transition hover:bg-slate-700"
+>
+  Edit
+</Link>
                   </div>
                 </div>
               </div>
