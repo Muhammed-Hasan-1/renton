@@ -132,6 +132,48 @@ router.post(
 
 module.exports = router;
 
+// DELETE EQUIPMENT
+router.delete(
+  "/:id",
+  authenticateUser,
+  authorizeOwner,
+  async (req, res) => {
+    try {
+      // Find the equipment
+      const equipment = await Equipment.findById(req.params.id);
+
+      if (!equipment) {
+        return res.status(404).json({
+          message: "Equipment not found",
+        });
+      }
+
+      // Check ownership
+      if (
+        !equipment.owner ||
+        String(equipment.owner) !== String(req.user._id)
+      ) {
+        return res.status(403).json({
+          message: "You can only delete your own equipment",
+        });
+      }
+
+      // Delete equipment
+      await Equipment.findByIdAndDelete(req.params.id);
+
+      res.json({
+        message: "Equipment deleted successfully",
+      });
+    } catch (error) {
+      console.error("Delete equipment error:", error);
+
+      res.status(500).json({
+        message: "Failed to delete equipment",
+      });
+    }
+  }
+);
+
 // UPDATE EQUIPMENT
 router.put(
   "/:id",

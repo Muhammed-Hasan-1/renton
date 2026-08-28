@@ -57,6 +57,48 @@ function MyEquipment() {
     );
   }
 
+  const handleDelete = async (equipmentId, equipmentName) => {
+  const confirmed = window.confirm(
+    `Are you sure you want to delete "${equipmentName}"?`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const token = localStorage.getItem("rentonToken");
+
+  if (!token) {
+    navigate("/signin");
+    return;
+  }
+
+  try {
+    await axios.delete(
+      `http://localhost:5000/api/equipment/${equipmentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Remove deleted equipment from the screen
+    setEquipments((previous) =>
+      previous.filter(
+        (equipment) => equipment._id !== equipmentId
+      )
+    );
+  } catch (error) {
+    console.error("Delete equipment error:", error);
+
+    setError(
+      error.response?.data?.message ||
+        "Failed to delete equipment."
+    );
+  }
+};
+
   return (
     <div className="min-h-screen bg-slate-50 py-16">
       <div className="mx-auto max-w-7xl px-8">
@@ -158,21 +200,36 @@ function MyEquipment() {
                     ₹{equipment.pricePerDay}/day
                   </p>
 
-                  <div className="mt-6 flex gap-3">
-                    <Link
-                      to={`/equipment/${equipment._id}`}
-                      className="flex-1 rounded-xl border border-emerald-600 px-4 py-3 text-center font-semibold text-emerald-700 transition hover:bg-emerald-50"
-                    >
-                      View
-                    </Link>
+<div className="mt-6 grid grid-cols-3 gap-3">
 
-<Link
-  to={`/my-equipment/${equipment._id}/edit`}
-  className="flex-1 rounded-xl bg-slate-800 px-4 py-3 text-center font-semibold text-white transition hover:bg-slate-700"
->
-  Edit
-</Link>
-                  </div>
+  <Link
+    to={`/equipment/${equipment._id}`}
+    className="rounded-xl border border-emerald-600 px-3 py-3 text-center font-semibold text-emerald-700 transition hover:bg-emerald-50"
+  >
+    View
+  </Link>
+
+  <Link
+    to={`/my-equipment/${equipment._id}/edit`}
+    className="rounded-xl bg-slate-800 px-3 py-3 text-center font-semibold text-white transition hover:bg-slate-700"
+  >
+    Edit
+  </Link>
+
+  <button
+    type="button"
+    onClick={() =>
+      handleDelete(
+        equipment._id,
+        equipment.name
+      )
+    }
+    className="rounded-xl bg-red-600 px-3 py-3 font-semibold text-white transition hover:bg-red-700"
+  >
+    Delete
+  </button>
+
+</div>
                 </div>
               </div>
             ))}
