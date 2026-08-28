@@ -130,7 +130,6 @@ router.post(
   }
 );
 
-module.exports = router;
 
 // DELETE EQUIPMENT
 router.delete(
@@ -246,3 +245,66 @@ router.put(
     }
   }
 );
+
+// UPDATE EQUIPMENT AVAILABILITY
+router.patch(
+  "/:id/availability",
+  authenticateUser,
+  authorizeOwner,
+  async (req, res) => {
+    try {
+      const { available } = req.body;
+
+      // Validate the availability value
+      if (typeof available !== "boolean") {
+        return res.status(400).json({
+          message: "Availability must be true or false",
+        });
+      }
+
+      // Find equipment
+      const equipment = await Equipment.findById(req.params.id);
+
+      if (!equipment) {
+        return res.status(404).json({
+          message: "Equipment not found",
+        });
+      }
+
+      // Check ownership
+      if (
+        !equipment.owner ||
+        String(equipment.owner) !== String(req.user._id)
+      ) {
+        return res.status(403).json({
+          message: "You can only manage your own equipment",
+        });
+      }
+
+      // Update availability
+      equipment.available = available;
+
+      await equipment.save();
+
+      res.json({
+        message: available
+          ? "Equipment is now available"
+          : "Equipment is now unavailable",
+        equipment,
+      });
+    } catch (error) {
+      console.error(
+        "Update equipment availability error:",
+        error
+      );
+
+      res.status(500).json({
+        message: "Failed to update equipment availability",
+      });
+    }
+  }
+);
+
+
+// Keep this at the VERY END of the file
+module.exports = router;

@@ -99,6 +99,53 @@ function MyEquipment() {
   }
 };
 
+const handleAvailabilityToggle = async (
+  equipmentId,
+  currentAvailability
+) => {
+  const token = localStorage.getItem("rentonToken");
+
+  if (!token) {
+    navigate("/signin");
+    return;
+  }
+
+  try {
+    setError("");
+
+    const response = await axios.patch(
+      `http://localhost:5000/api/equipment/${equipmentId}/availability`,
+      {
+        available: !currentAvailability,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Update the equipment immediately on the page
+    setEquipments((previous) =>
+      previous.map((equipment) =>
+        equipment._id === equipmentId
+          ? response.data.equipment
+          : equipment
+      )
+    );
+  } catch (error) {
+    console.error(
+      "Availability update error:",
+      error
+    );
+
+    setError(
+      error.response?.data?.message ||
+        "Failed to update availability."
+    );
+  }
+};
+
   return (
     <div className="min-h-screen bg-slate-50 py-16">
       <div className="mx-auto max-w-7xl px-8">
@@ -200,7 +247,7 @@ function MyEquipment() {
                     ₹{equipment.pricePerDay}/day
                   </p>
 
-<div className="mt-6 grid grid-cols-3 gap-3">
+<div className="mt-6 grid grid-cols-2 gap-3">
 
   <Link
     to={`/equipment/${equipment._id}`}
@@ -219,6 +266,25 @@ function MyEquipment() {
   <button
     type="button"
     onClick={() =>
+      handleAvailabilityToggle(
+        equipment._id,
+        equipment.available
+      )
+    }
+    className={`rounded-xl px-3 py-3 font-semibold text-white transition ${
+      equipment.available
+        ? "bg-amber-500 hover:bg-amber-600"
+        : "bg-emerald-600 hover:bg-emerald-700"
+    }`}
+  >
+    {equipment.available
+      ? "Set Unavailable"
+      : "Set Available"}
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
       handleDelete(
         equipment._id,
         equipment.name
@@ -229,8 +295,7 @@ function MyEquipment() {
     Delete
   </button>
 
-</div>
-                </div>
+</div>                </div>
               </div>
             ))}
           </div>
