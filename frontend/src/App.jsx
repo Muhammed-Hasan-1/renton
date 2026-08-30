@@ -24,14 +24,13 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 
 import RentEquipment from "./pages/RentEquipment";
+import MyEquipment from "./pages/MyEquipment";
+import AddEquipment from "./pages/AddEquipment";
+import EditEquipment from "./pages/EditEquipment";
+import OwnerRentalRequests from "./pages/OwnerRentalRequests";
 
 import ScrollToTop from "./components/ScrollToTop";
 
-import MyEquipment from "./pages/MyEquipment";
-
-import AddEquipment from "./pages/AddEquipment";
-
-import EditEquipment from "./pages/EditEquipment";
 
 function App() {
   return (
@@ -41,26 +40,119 @@ function App() {
       <Navbar />
 
       <Routes>
-        <Route path="/equipment/:id" element={<EquipmentDetails />} />
-        <Route path="/" element={<Landing />} />
-        <Route path="/equipment" element={<Equipment />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/my-equipment" element={<MyEquipment />} />
-        <Route path="/add-equipment" element={<AddEquipment />}/>
-        <Route path="/my-equipment/:id/edit" element={<EditEquipment />}/>
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/rental-history" element={<RentalHistory />} />
-        <Route path="/maintenance" element={<Maintenance />} />
-        <Route path="/equipment/:id/rent" element={<RentEquipment />} />
+
+        {/* Public pages */}
+        <Route
+          path="/"
+          element={<Landing />}
+        />
+
+        <Route
+          path="/equipment"
+          element={<Equipment />}
+        />
+
+        <Route
+          path="/equipment/:id"
+          element={<EquipmentDetails />}
+        />
+
+        <Route
+          path="/categories"
+          element={<Categories />}
+        />
+
+        <Route
+          path="/about"
+          element={<About />}
+        />
+
+        <Route
+          path="/contact"
+          element={<Contact />}
+        />
+
+        <Route
+          path="/feedback"
+          element={<Feedback />}
+        />
+
+        <Route
+          path="/signin"
+          element={<SignIn />}
+        />
+
+        <Route
+          path="/signup"
+          element={<SignUp />}
+        />
+
+
+        {/* User pages */}
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/booking"
+          element={<Booking />}
+        />
+
+        <Route
+          path="/rental-history"
+          element={<RentalHistory />}
+        />
+
+        <Route
+          path="/equipment/:id/rent"
+          element={<RentEquipment />}
+        />
+
+
+        {/* Owner pages */}
+        <Route
+          path="/my-equipment"
+          element={<MyEquipment />}
+        />
+
+        <Route
+          path="/add-equipment"
+          element={<AddEquipment />}
+        />
+
+        <Route
+          path="/my-equipment/:id/edit"
+          element={<EditEquipment />}
+        />
+
+        <Route
+          path="/rental-requests"
+          element={<OwnerRentalRequests />}
+        />
+
+
+        {/* Existing pages */}
+        <Route
+          path="/inventory"
+          element={<Inventory />}
+        />
+
+        <Route
+          path="/maintenance"
+          element={<Maintenance />}
+        />
+
+        <Route
+          path="/privacy"
+          element={<Privacy />}
+        />
+
+        <Route
+          path="/terms"
+          element={<Terms />}
+        />
+
       </Routes>
 
       <Footer />
