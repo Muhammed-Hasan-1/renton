@@ -4,7 +4,10 @@ const mongoose = require("mongoose");
 const Rental = require("../models/Rental");
 const Equipment = require("../models/Equipment");
 
-const { authenticateUser } = require("../middleware/authMiddleware");
+const {
+  authenticateUser,
+  authorizeOwner,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -37,7 +40,9 @@ router.post("/", authenticateUser, async (req, res) => {
     }
 
     // Find equipment
-    const equipment = await Equipment.findById(equipmentId);
+    const equipment = await Equipment.findById(
+      equipmentId
+    );
 
     if (!equipment) {
       return res.status(404).json({
@@ -48,7 +53,8 @@ router.post("/", authenticateUser, async (req, res) => {
     // Check availability
     if (!equipment.available) {
       return res.status(400).json({
-        message: "This equipment is currently unavailable",
+        message:
+          "This equipment is currently unavailable",
       });
     }
 
@@ -73,7 +79,7 @@ router.post("/", authenticateUser, async (req, res) => {
       });
     }
 
-    // Calculate number of days
+    // Calculate rental days
     const millisecondsPerDay =
       1000 * 60 * 60 * 24;
 
@@ -82,11 +88,11 @@ router.post("/", authenticateUser, async (req, res) => {
         (end - start) / millisecondsPerDay
       ) || 1;
 
-    // Calculate total
+    // Calculate total amount
     const totalAmount =
       totalDays * equipment.pricePerDay;
 
-    // Create rental
+    // Create rental as pending
     const rental = await Rental.create({
       customer: req.user.id,
       equipment: equipment._id,
@@ -107,11 +113,12 @@ router.post("/", authenticateUser, async (req, res) => {
         )
         .populate(
           "customer",
-          "name email"
+          "name email phone"
         );
 
     res.status(201).json({
-      message: "Rental booking created successfully",
+      message:
+        "Rental booking created successfully",
       rental: populatedRental,
     });
 
@@ -129,7 +136,7 @@ router.post("/", authenticateUser, async (req, res) => {
 
 
 // ======================================================
-// GET MY RENTALS
+// GET MY RENTALS - CUSTOMER
 // ======================================================
 
 router.get(
@@ -169,24 +176,29 @@ router.get(
 router.get(
   "/owner",
   authenticateUser,
+  authorizeOwner,
   async (req, res) => {
     try {
-      // Find equipment owned by the logged-in owner
-      const ownerEquipment = await Equipment.find({
-        owner: req.user._id,
-      }).select("_id");
+      // Find equipment owned by logged-in owner
+      const ownerEquipment =
+        await Equipment.find({
+          owner: req.user._id,
+        }).select("_id");
 
-      const equipmentIds = ownerEquipment.map(
-        (equipment) => equipment._id
-      );
+      const equipmentIds =
+        ownerEquipment.map(
+          (equipment) => equipment._id
+        );
 
-      // Find rentals for that equipment
+      // Find rentals for owner's equipment
       const rentals = await Rental.find({
-        equipment: { $in: equipmentIds },
+        equipment: {
+          $in: equipmentIds,
+        },
       })
         .populate(
           "equipment",
-          "name category pricePerDay image location"
+          "name category pricePerDay image location owner available"
         )
         .populate(
           "customer",
@@ -213,40 +225,54 @@ router.get(
 
 // ======================================================
 // UPDATE RENTAL STATUS
-// OWNER: APPROVE / REJECT
+//
+// Allowed lifecycle transitions:
+//
+// pending   → confirmed
+// pending   → cancelled
+// confirmed → active
+// active    → completed
 // ======================================================
 
 router.patch(
   "/:id/status",
   authenticateUser,
+  authorizeOwner,
   async (req, res) => {
     try {
       const { status } = req.body;
 
-      // Only these status changes are allowed
-      if (
-        status !== "confirmed" &&
-        status !== "cancelled"
-      ) {
+      // Allowed statuses from frontend
+      const allowedStatuses = [
+        "confirmed",
+        "cancelled",
+        "active",
+        "completed",
+      ];
+
+      if (!allowedStatuses.includes(status)) {
         return res.status(400).json({
           message:
-            "Status must be confirmed or cancelled",
+            "Invalid rental status",
         });
       }
 
       // Validate rental ID
-      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          req.params.id
+        )
+      ) {
         return res.status(400).json({
           message: "Invalid rental ID",
         });
       }
 
-      // Find rental
-      const rental = await Rental.findById(
-        req.params.id
-      ).populate(
-        "equipment"
-      );
+      // Find rental and populate equipment
+      const rental =
+        await Rental.findById(
+          req.params.id
+        ).populate("equipment");
 
       if (!rental) {
         return res.status(404).json({
@@ -254,12 +280,20 @@ router.patch(
         });
       }
 
+      // Equipment must exist
+      if (!rental.equipment) {
+        return res.status(404).json({
+          message:
+            "Equipment associated with this rental was not found",
+        });
+      }
+
       // Make sure rental belongs to owner's equipment
       if (
-        !rental.equipment ||
         !rental.equipment.owner ||
-        String(rental.equipment.owner) !==
-          String(req.user._id)
+        String(
+          rental.equipment.owner
+        ) !== String(req.user._id)
       ) {
         return res.status(403).json({
           message:
@@ -267,85 +301,143 @@ router.patch(
         });
       }
 
-      // Only pending rentals can be approved/rejected
-      if (rental.status !== "pending") {
-        return res.status(400).json({
-          message:
-            "Only pending rental requests can be updated",
-        });
-      }
 
       // ==================================================
-      // REJECT REQUEST
+      // PENDING → CONFIRMED
       // ==================================================
 
-      if (status === "cancelled") {
-        rental.status = "cancelled";
+      if (status === "confirmed") {
+        if (rental.status !== "pending") {
+          return res.status(400).json({
+            message:
+              "Only pending rentals can be approved",
+          });
+        }
+
+        // Equipment must be available
+        if (!rental.equipment.available) {
+          return res.status(400).json({
+            message:
+              "This equipment is currently unavailable",
+          });
+        }
+
+        // Check for overlapping confirmed/active rentals
+        const overlappingRental =
+          await Rental.findOne({
+            _id: {
+              $ne: rental._id,
+            },
+
+            equipment:
+              rental.equipment._id,
+
+            status: {
+              $in: [
+                "confirmed",
+                "active",
+              ],
+            },
+
+            startDate: {
+              $lte: rental.endDate,
+            },
+
+            endDate: {
+              $gte: rental.startDate,
+            },
+          });
+
+        if (overlappingRental) {
+          return res.status(400).json({
+            message:
+              "This equipment already has a confirmed rental during the selected dates",
+          });
+        }
+
+        rental.status = "confirmed";
 
         await rental.save();
 
-        return res.json({
-          message:
-            "Rental request rejected successfully",
-          rental,
-        });
+        // Block equipment after approval
+        rental.equipment.available =
+          false;
+
+        await rental.equipment.save();
       }
+
 
       // ==================================================
-      // APPROVE REQUEST
+      // PENDING → CANCELLED
       // ==================================================
 
-      // Make sure equipment is still available
-      if (!rental.equipment.available) {
-        return res.status(400).json({
-          message:
-            "This equipment is currently unavailable",
-        });
+      else if (status === "cancelled") {
+        if (rental.status !== "pending") {
+          return res.status(400).json({
+            message:
+              "Only pending rentals can be rejected",
+          });
+        }
+
+        rental.status = "cancelled";
+
+        await rental.save();
       }
 
-      // Check for overlapping approved/active rentals
-      const overlappingRental =
-        await Rental.findOne({
-          _id: { $ne: rental._id },
 
-          equipment: rental.equipment._id,
+      // ==================================================
+      // CONFIRMED → ACTIVE
+      // ==================================================
 
-          status: {
-            $in: [
-              "confirmed",
-              "active",
-            ],
-          },
+      else if (status === "active") {
+        if (rental.status !== "confirmed") {
+          return res.status(400).json({
+            message:
+              "Only confirmed rentals can be started",
+          });
+        }
 
-          startDate: {
-            $lte: rental.endDate,
-          },
+        rental.status = "active";
 
-          endDate: {
-            $gte: rental.startDate,
-          },
-        });
+        await rental.save();
 
-      if (overlappingRental) {
-        return res.status(400).json({
-          message:
-            "This equipment already has a confirmed rental during the selected dates",
-        });
+        // Keep equipment unavailable
+        rental.equipment.available =
+          false;
+
+        await rental.equipment.save();
       }
 
-      // Confirm rental
-      rental.status = "confirmed";
 
-      await rental.save();
+      // ==================================================
+      // ACTIVE → COMPLETED
+      // ==================================================
 
-      // Mark equipment unavailable
-      rental.equipment.available = false;
+      else if (status === "completed") {
+        if (rental.status !== "active") {
+          return res.status(400).json({
+            message:
+              "Only active rentals can be completed",
+          });
+        }
 
-      await rental.equipment.save();
+        rental.status = "completed";
 
-      // Get populated rental
+        await rental.save();
+
+        // Make equipment available again
+        rental.equipment.available =
+          true;
+
+        await rental.equipment.save();
+      }
+
+
+      // Populate updated rental
       const updatedRental =
-        await Rental.findById(rental._id)
+        await Rental.findById(
+          rental._id
+        )
           .populate(
             "equipment",
             "name category pricePerDay image location owner available"
@@ -355,9 +447,25 @@ router.patch(
             "name email phone"
           );
 
-      return res.json({
-        message:
-          "Rental request approved successfully",
+      let message =
+        "Rental status updated successfully";
+
+      if (status === "confirmed") {
+        message =
+          "Rental request approved successfully";
+      } else if (status === "cancelled") {
+        message =
+          "Rental request rejected successfully";
+      } else if (status === "active") {
+        message =
+          "Rental has been started successfully";
+      } else if (status === "completed") {
+        message =
+          "Rental completed successfully and equipment is available again";
+      }
+
+      res.json({
+        message,
         rental: updatedRental,
       });
 
