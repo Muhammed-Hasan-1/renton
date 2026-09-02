@@ -6,9 +6,10 @@ const Test = require("./models/Test");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const equipmentRoutes = require("./routes/equipmentRoutes");
 const rentalRoutes = require("./routes/rentalRoutes");
-const userRoutes = require("./routes/userRoutes");
+const feedbackRoutes = require("./routes/feedbackRoutes");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/rentals", rentalRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 // MongoDB connection
 mongoose
