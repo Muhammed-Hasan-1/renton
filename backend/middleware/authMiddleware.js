@@ -50,7 +50,19 @@ const authorizeOwner = (req, res, next) => {
   next();
 };
 
+// Allow only admins
+const authorizeAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({
+      message: "Only administrators can perform this action",
+    });
+  }
+
+  next();
+};
+
 module.exports = {
   authenticateUser,
   authorizeOwner,
+  authorizeAdmin,
 };
