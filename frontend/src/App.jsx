@@ -28,9 +28,9 @@ import MyEquipment from "./pages/MyEquipment";
 import AddEquipment from "./pages/AddEquipment";
 import EditEquipment from "./pages/EditEquipment";
 import OwnerRentalRequests from "./pages/OwnerRentalRequests";
+import Profile from "./pages/Profile";
 
 import ScrollToTop from "./components/ScrollToTop";
-
 
 function App() {
   return (
@@ -40,64 +40,34 @@ function App() {
       <Navbar />
 
       <Routes>
-
         {/* Public pages */}
-        <Route
-          path="/"
-          element={<Landing />}
-        />
+        <Route path="/" element={<Landing />} />
 
-        <Route
-          path="/equipment"
-          element={<Equipment />}
-        />
+        <Route path="/equipment" element={<Equipment />} />
 
         <Route
           path="/equipment/:id"
           element={<EquipmentDetails />}
         />
 
-        <Route
-          path="/categories"
-          element={<Categories />}
-        />
+        <Route path="/categories" element={<Categories />} />
 
-        <Route
-          path="/about"
-          element={<About />}
-        />
+        <Route path="/about" element={<About />} />
 
-        <Route
-          path="/contact"
-          element={<Contact />}
-        />
+        <Route path="/contact" element={<Contact />} />
 
-        <Route
-          path="/feedback"
-          element={<Feedback />}
-        />
+        <Route path="/feedback" element={<Feedback />} />
 
-        <Route
-          path="/signin"
-          element={<SignIn />}
-        />
+        <Route path="/signin" element={<SignIn />} />
 
-        <Route
-          path="/signup"
-          element={<SignUp />}
-        />
-
+        <Route path="/signup" element={<SignUp />} />
 
         {/* User pages */}
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+        <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route
-          path="/booking"
-          element={<Booking />}
-        />
+        <Route path="/profile" element={<Profile />} />
+
+        <Route path="/booking" element={<Booking />} />
 
         <Route
           path="/rental-history"
@@ -108,7 +78,6 @@ function App() {
           path="/equipment/:id/rent"
           element={<RentEquipment />}
         />
-
 
         {/* Owner pages */}
         <Route
@@ -131,28 +100,17 @@ function App() {
           element={<OwnerRentalRequests />}
         />
 
-
         {/* Existing pages */}
-        <Route
-          path="/inventory"
-          element={<Inventory />}
-        />
+        <Route path="/inventory" element={<Inventory />} />
 
         <Route
           path="/maintenance"
           element={<Maintenance />}
         />
 
-        <Route
-          path="/privacy"
-          element={<Privacy />}
-        />
+        <Route path="/privacy" element={<Privacy />} />
 
-        <Route
-          path="/terms"
-          element={<Terms />}
-        />
-
+        <Route path="/terms" element={<Terms />} />
       </Routes>
 
       <Footer />
