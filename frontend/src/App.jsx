@@ -34,6 +34,8 @@ import AdminUsers from "./pages/AdminUsers";
 
 import AdminFeedback from "./pages/AdminFeedback";
 
+import AdminManagement from "./pages/AdminManagement";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -94,6 +96,10 @@ function App() {
 
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route
+  path="/admin/management"
+  element={<AdminManagement />}
+/>
       </Routes>
 
       <Footer />

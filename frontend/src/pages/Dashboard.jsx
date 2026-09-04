@@ -715,6 +715,29 @@ function Dashboard() {
               </Link>
             )}
 
+            {/* Admin Equipment & Rental Management */}
+
+{isAdmin && (
+  <Link
+    to="/admin/management"
+    className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+  >
+    <div className="text-4xl">⚙️</div>
+
+    <h3 className="mt-5 text-xl font-bold text-slate-800">
+      Equipment & Rental Management
+    </h3>
+
+    <p className="mt-2 text-slate-500">
+      Monitor equipment and manage platform-wide rentals.
+    </p>
+
+    <div className="mt-5 font-semibold text-emerald-600">
+      Manage Platform →
+    </div>
+  </Link>
+)}
+
             {/* Admin Feedback Management */}
 
             {isAdmin && (
@@ -737,6 +760,7 @@ function Dashboard() {
                 </div>
               </Link>
             )}
+
             {/* My Equipment */}
 
             {isOwner && (
