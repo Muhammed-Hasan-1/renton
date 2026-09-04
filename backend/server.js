@@ -11,6 +11,7 @@ const equipmentRoutes = require("./routes/equipmentRoutes");
 const rentalRoutes = require("./routes/rentalRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const adminUserRoutes = require("./routes/adminUserRoutes");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/equipment", equipmentRoutes);
 app.use("/api/rentals", rentalRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/users", adminUserRoutes);
 
 // MongoDB connection
 mongoose
@@ -66,5 +68,7 @@ app.post("/api/test", async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Renton server running on http://localhost:${PORT}`);
+  console.log(
+    `Renton server running on http://localhost:${PORT}`
+  );
 });

@@ -30,6 +30,8 @@ import EditEquipment from "./pages/EditEquipment";
 import OwnerRentalRequests from "./pages/OwnerRentalRequests";
 import Profile from "./pages/Profile";
 
+import AdminUsers from "./pages/AdminUsers";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -111,6 +113,11 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
 
         <Route path="/terms" element={<Terms />} />
+
+        <Route
+  path="/admin/users"
+  element={<AdminUsers />}
+/>
       </Routes>
 
       <Footer />
