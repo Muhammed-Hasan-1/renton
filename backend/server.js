@@ -13,6 +13,7 @@ const feedbackRoutes = require("./routes/feedbackRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const adminUserRoutes = require("./routes/adminUserRoutes");
 const inventoryRoutes = require("./routes/inventoryRoutes");
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/inventory", inventoryRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 // MongoDB connection
 mongoose
