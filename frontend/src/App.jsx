@@ -32,6 +32,8 @@ import Profile from "./pages/Profile";
 
 import AdminUsers from "./pages/AdminUsers";
 
+import AdminFeedback from "./pages/AdminFeedback";
+
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
@@ -47,10 +49,7 @@ function App() {
 
         <Route path="/equipment" element={<Equipment />} />
 
-        <Route
-          path="/equipment/:id"
-          element={<EquipmentDetails />}
-        />
+        <Route path="/equipment/:id" element={<EquipmentDetails />} />
 
         <Route path="/categories" element={<Categories />} />
 
@@ -71,53 +70,30 @@ function App() {
 
         <Route path="/booking" element={<Booking />} />
 
-        <Route
-          path="/rental-history"
-          element={<RentalHistory />}
-        />
+        <Route path="/rental-history" element={<RentalHistory />} />
 
-        <Route
-          path="/equipment/:id/rent"
-          element={<RentEquipment />}
-        />
+        <Route path="/equipment/:id/rent" element={<RentEquipment />} />
 
         {/* Owner pages */}
-        <Route
-          path="/my-equipment"
-          element={<MyEquipment />}
-        />
+        <Route path="/my-equipment" element={<MyEquipment />} />
 
-        <Route
-          path="/add-equipment"
-          element={<AddEquipment />}
-        />
+        <Route path="/add-equipment" element={<AddEquipment />} />
 
-        <Route
-          path="/my-equipment/:id/edit"
-          element={<EditEquipment />}
-        />
+        <Route path="/my-equipment/:id/edit" element={<EditEquipment />} />
 
-        <Route
-          path="/rental-requests"
-          element={<OwnerRentalRequests />}
-        />
+        <Route path="/rental-requests" element={<OwnerRentalRequests />} />
 
         {/* Existing pages */}
         <Route path="/inventory" element={<Inventory />} />
 
-        <Route
-          path="/maintenance"
-          element={<Maintenance />}
-        />
+        <Route path="/maintenance" element={<Maintenance />} />
 
         <Route path="/privacy" element={<Privacy />} />
 
         <Route path="/terms" element={<Terms />} />
 
-        <Route
-  path="/admin/users"
-  element={<AdminUsers />}
-/>
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
       </Routes>
 
       <Footer />

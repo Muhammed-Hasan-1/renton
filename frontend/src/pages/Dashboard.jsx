@@ -62,10 +62,7 @@ function Dashboard() {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
-        console.error(
-          "Failed to read logged-in user:",
-          error
-        );
+        console.error("Failed to read logged-in user:", error);
 
         localStorage.removeItem("rentonUser");
         localStorage.removeItem("rentonToken");
@@ -79,14 +76,11 @@ function Dashboard() {
   // ROLE CHECK
   // ======================================================
 
-  const isOwner =
-    user?.role?.toLowerCase() === "owner";
+  const isOwner = user?.role?.toLowerCase() === "owner";
 
-  const isAdmin =
-    user?.role?.toLowerCase() === "admin";
+  const isAdmin = user?.role?.toLowerCase() === "admin";
 
-  const isCustomer =
-    user?.role?.toLowerCase() === "customer";
+  const isCustomer = user?.role?.toLowerCase() === "customer";
 
   // ======================================================
   // LOAD OWNER STATISTICS
@@ -109,75 +103,51 @@ function Dashboard() {
         setStatsLoading(true);
         setStatsError("");
 
-        const [
-          equipmentResponse,
-          rentalsResponse,
-        ] = await Promise.all([
-          axios.get(
-            "http://localhost:5000/api/equipment/my-equipment",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          ),
+        const [equipmentResponse, rentalsResponse] = await Promise.all([
+          axios.get("http://localhost:5000/api/equipment/my-equipment", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
 
-          axios.get(
-            "http://localhost:5000/api/rentals/owner",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          ),
+          axios.get("http://localhost:5000/api/rentals/owner", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
-        const equipments =
-          equipmentResponse.data || [];
+        const equipments = equipmentResponse.data || [];
 
-        const rentals =
-          rentalsResponse.data || [];
+        const rentals = rentalsResponse.data || [];
 
         // Equipment statistics
-        const totalEquipment =
-          equipments.length;
+        const totalEquipment = equipments.length;
 
-        const availableEquipment =
-          equipments.filter(
-            (equipment) =>
-              equipment.available === true
-          ).length;
+        const availableEquipment = equipments.filter(
+          (equipment) => equipment.available === true,
+        ).length;
 
-        const unavailableEquipment =
-          equipments.filter(
-            (equipment) =>
-              equipment.available === false
-          ).length;
+        const unavailableEquipment = equipments.filter(
+          (equipment) => equipment.available === false,
+        ).length;
 
         // Rental statistics
-        const pendingRequests =
-          rentals.filter(
-            (rental) =>
-              rental.status === "pending"
-          ).length;
+        const pendingRequests = rentals.filter(
+          (rental) => rental.status === "pending",
+        ).length;
 
-        const confirmedRentals =
-          rentals.filter(
-            (rental) =>
-              rental.status === "confirmed"
-          ).length;
+        const confirmedRentals = rentals.filter(
+          (rental) => rental.status === "confirmed",
+        ).length;
 
-        const activeRentals =
-          rentals.filter(
-            (rental) =>
-              rental.status === "active"
-          ).length;
+        const activeRentals = rentals.filter(
+          (rental) => rental.status === "active",
+        ).length;
 
-        const completedRentals =
-          rentals.filter(
-            (rental) =>
-              rental.status === "completed"
-          ).length;
+        const completedRentals = rentals.filter(
+          (rental) => rental.status === "completed",
+        ).length;
 
         setOwnerStats({
           totalEquipment,
@@ -189,14 +159,10 @@ function Dashboard() {
           completedRentals,
         });
       } catch (error) {
-        console.error(
-          "Failed to load owner statistics:",
-          error
-        );
+        console.error("Failed to load owner statistics:", error);
 
         setStatsError(
-          error.response?.data?.message ||
-            "Unable to load owner statistics."
+          error.response?.data?.message || "Unable to load owner statistics.",
         );
       } finally {
         setStatsLoading(false);
@@ -233,7 +199,7 @@ function Dashboard() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         setAdminStats(
@@ -260,17 +226,13 @@ function Dashboard() {
             feedback: {
               total: 0,
             },
-          }
+          },
         );
       } catch (error) {
-        console.error(
-          "Failed to load admin statistics:",
-          error
-        );
+        console.error("Failed to load admin statistics:", error);
 
         setStatsError(
-          error.response?.data?.message ||
-            "Unable to load admin statistics."
+          error.response?.data?.message || "Unable to load admin statistics.",
         );
       } finally {
         setStatsLoading(false);
@@ -309,12 +271,7 @@ function Dashboard() {
   // STAT CARD
   // ======================================================
 
-  const StatCard = ({
-    icon,
-    label,
-    value,
-    description,
-  }) => {
+  const StatCard = ({ icon, label, value, description }) => {
     return (
       <div className="rounded-3xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
         <div className="flex items-start justify-between gap-4">
@@ -334,9 +291,7 @@ function Dashboard() {
         </div>
 
         {description && (
-          <p className="mt-4 text-sm text-slate-500">
-            {description}
-          </p>
+          <p className="mt-4 text-sm text-slate-500">{description}</p>
         )}
       </div>
     );
@@ -358,8 +313,8 @@ function Dashboard() {
             {isAdmin
               ? "Administrator"
               : isOwner
-              ? "Equipment Owner"
-              : "Welcome back"}
+                ? "Equipment Owner"
+                : "Welcome back"}
           </p>
 
           <h1 className="mt-2 text-4xl font-bold md:text-5xl">
@@ -370,8 +325,8 @@ function Dashboard() {
             {isAdmin
               ? "Manage and monitor the Renton platform from your administrator dashboard."
               : isOwner
-              ? "Manage your equipment and rental activity from your Renton dashboard."
-              : "Manage your rentals, equipment and account from your Renton dashboard."}
+                ? "Manage your equipment and rental activity from your Renton dashboard."
+                : "Manage your rentals, equipment and account from your Renton dashboard."}
           </p>
         </div>
       </section>
@@ -392,17 +347,15 @@ function Dashboard() {
                 {user.name || "Renton User"}
               </h2>
 
-              <p className="mt-2 text-slate-500">
-                {user.email}
-              </p>
+              <p className="mt-2 text-slate-500">{user.email}</p>
 
               <p className="mt-4">
                 <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold capitalize text-emerald-700">
                   {isAdmin
                     ? "Administrator"
                     : isOwner
-                    ? "Equipment Owner"
-                    : "Customer"}
+                      ? "Equipment Owner"
+                      : "Customer"}
                 </span>
               </p>
             </div>
@@ -432,8 +385,8 @@ function Dashboard() {
               </h2>
 
               <p className="mt-2 text-slate-500">
-                Monitor users, equipment, rentals and feedback
-                across the Renton system.
+                Monitor users, equipment, rentals and feedback across the Renton
+                system.
               </p>
             </div>
 
@@ -445,9 +398,7 @@ function Dashboard() {
 
             {/* Users */}
             <div className="mb-6">
-              <h3 className="mb-4 text-xl font-bold text-slate-800">
-                Users
-              </h3>
+              <h3 className="mb-4 text-xl font-bold text-slate-800">Users</h3>
 
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
@@ -512,9 +463,7 @@ function Dashboard() {
 
             {/* Rentals */}
             <div className="mb-6">
-              <h3 className="mb-4 text-xl font-bold text-slate-800">
-                Rentals
-              </h3>
+              <h3 className="mb-4 text-xl font-bold text-slate-800">Rentals</h3>
 
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <StatCard
@@ -595,8 +544,7 @@ function Dashboard() {
               </h2>
 
               <p className="mt-2 text-slate-500">
-                A quick overview of your equipment and rental
-                activity.
+                A quick overview of your equipment and rental activity.
               </p>
             </div>
 
@@ -746,27 +694,49 @@ function Dashboard() {
 
             {/* Admin User Management */}
 
-{isAdmin && (
-  <Link
-    to="/admin/users"
-    className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-  >
-    <div className="text-4xl">👥</div>
+            {isAdmin && (
+              <Link
+                to="/admin/users"
+                className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="text-4xl">👥</div>
 
-    <h3 className="mt-5 text-xl font-bold text-slate-800">
-      User Management
-    </h3>
+                <h3 className="mt-5 text-xl font-bold text-slate-800">
+                  User Management
+                </h3>
 
-    <p className="mt-2 text-slate-500">
-      View users and manage customer, owner and admin roles.
-    </p>
+                <p className="mt-2 text-slate-500">
+                  View users and manage customer, owner and admin roles.
+                </p>
 
-    <div className="mt-5 font-semibold text-emerald-600">
-      Manage Users →
-    </div>
-  </Link>
-)}
+                <div className="mt-5 font-semibold text-emerald-600">
+                  Manage Users →
+                </div>
+              </Link>
+            )}
 
+            {/* Admin Feedback Management */}
+
+            {isAdmin && (
+              <Link
+                to="/admin/feedback"
+                className="rounded-3xl bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="text-4xl">💬</div>
+
+                <h3 className="mt-5 text-xl font-bold text-slate-800">
+                  Feedback Management
+                </h3>
+
+                <p className="mt-2 text-slate-500">
+                  Review and manage feedback submitted by Renton users.
+                </p>
+
+                <div className="mt-5 font-semibold text-emerald-600">
+                  Manage Feedback →
+                </div>
+              </Link>
+            )}
             {/* My Equipment */}
 
             {isOwner && (
@@ -781,8 +751,7 @@ function Dashboard() {
                 </h3>
 
                 <p className="mt-2 text-slate-500">
-                  Add, edit, delete and manage your equipment
-                  listings.
+                  Add, edit, delete and manage your equipment listings.
                 </p>
 
                 <div className="mt-5 font-semibold text-emerald-600">
@@ -805,8 +774,7 @@ function Dashboard() {
                 </h3>
 
                 <p className="mt-2 text-slate-500">
-                  Review customer requests and approve or
-                  reject rentals.
+                  Review customer requests and approve or reject rentals.
                 </p>
 
                 <div className="mt-5 font-semibold text-emerald-600">
@@ -877,9 +845,7 @@ function Dashboard() {
           <div className="rounded-3xl bg-white p-8 shadow-sm">
             <div className="grid gap-6 md:grid-cols-3">
               <div>
-                <p className="text-sm text-slate-400">
-                  Name
-                </p>
+                <p className="text-sm text-slate-400">Name</p>
 
                 <p className="mt-1 text-lg font-semibold text-slate-800">
                   {user.name || "Not available"}
@@ -887,9 +853,7 @@ function Dashboard() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-400">
-                  Email
-                </p>
+                <p className="text-sm text-slate-400">Email</p>
 
                 <p className="mt-1 text-lg font-semibold text-slate-800">
                   {user.email || "Not available"}
@@ -897,18 +861,16 @@ function Dashboard() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-400">
-                  Account Type
-                </p>
+                <p className="text-sm text-slate-400">Account Type</p>
 
                 <p className="mt-1 text-lg font-semibold text-emerald-600">
                   {isAdmin
                     ? "Administrator"
                     : isOwner
-                    ? "Equipment Owner"
-                    : isCustomer
-                    ? "Customer"
-                    : "User"}
+                      ? "Equipment Owner"
+                      : isCustomer
+                        ? "Customer"
+                        : "User"}
                 </p>
               </div>
             </div>

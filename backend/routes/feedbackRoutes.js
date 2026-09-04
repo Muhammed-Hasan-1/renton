@@ -1,6 +1,11 @@
 const express = require("express");
+
 const Feedback = require("../models/Feedback");
-const { authenticateUser } = require("../middleware/authMiddleware");
+
+const {
+  authenticateUser,
+  authorizeAdmin,
+} = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -78,5 +83,67 @@ router.get("/my", authenticateUser, async (req, res) => {
     });
   }
 });
+
+/*
+  GET ALL FEEDBACK
+  GET /api/feedback/all
+  ADMIN ONLY
+*/
+router.get(
+  "/all",
+  authenticateUser,
+  authorizeAdmin,
+  async (req, res) => {
+    try {
+      const feedback = await Feedback.find()
+        .populate("user", "name email role")
+        .sort({ createdAt: -1 });
+
+      res.json({
+        feedback,
+      });
+    } catch (error) {
+      console.error("Get all feedback error:", error);
+
+      res.status(500).json({
+        message: "Failed to load all feedback",
+      });
+    }
+  }
+);
+
+/*
+  DELETE FEEDBACK
+  DELETE /api/feedback/:id
+  ADMIN ONLY
+*/
+router.delete(
+  "/:id",
+  authenticateUser,
+  authorizeAdmin,
+  async (req, res) => {
+    try {
+      const feedback = await Feedback.findById(req.params.id);
+
+      if (!feedback) {
+        return res.status(404).json({
+          message: "Feedback not found",
+        });
+      }
+
+      await Feedback.findByIdAndDelete(req.params.id);
+
+      res.json({
+        message: "Feedback deleted successfully",
+      });
+    } catch (error) {
+      console.error("Delete feedback error:", error);
+
+      res.status(500).json({
+        message: "Failed to delete feedback",
+      });
+    }
+  }
+);
 
 module.exports = router;
