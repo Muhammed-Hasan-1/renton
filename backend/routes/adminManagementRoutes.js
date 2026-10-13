@@ -204,13 +204,6 @@ router.patch(
           });
         }
 
-        if (!equipment.available) {
-          return res.status(400).json({
-            message:
-              "This equipment is currently unavailable",
-          });
-        }
-
         const overlappingRental =
           await Rental.findOne({
             _id: {

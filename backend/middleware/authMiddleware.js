@@ -39,11 +39,11 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
-// Allow only equipment owners
+// Allow equipment owners and administrators
 const authorizeOwner = (req, res, next) => {
-  if (req.user.role !== "owner") {
+  if (req.user.role !== "owner" && req.user.role !== "admin") {
     return res.status(403).json({
-      message: "Only equipment owners can perform this action",
+      message: "Only equipment owners or administrators can perform this action",
     });
   }
 

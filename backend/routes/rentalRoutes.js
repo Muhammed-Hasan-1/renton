@@ -50,6 +50,13 @@ router.post("/", authenticateUser, async (req, res) => {
       });
     }
 
+    // Prevent owners from renting their own equipment
+    if (equipment.owner && String(equipment.owner) === String(req.user._id)) {
+      return res.status(400).json({
+        message: "You cannot rent your own equipment",
+      });
+    }
+
     // Check availability
     if (!equipment.available) {
       return res.status(400).json({
@@ -79,14 +86,12 @@ router.post("/", authenticateUser, async (req, res) => {
       });
     }
 
-    // Calculate rental days
-    const millisecondsPerDay =
-      1000 * 60 * 60 * 24;
+    // Calculate rental days (inclusive calendar days)
+    const startUtc = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const endUtc = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
-    const totalDays =
-      Math.ceil(
-        (end - start) / millisecondsPerDay
-      ) || 1;
+    const totalDays = Math.floor((endUtc - startUtc) / millisecondsPerDay) + 1;
 
     // Calculate total amount
     const totalAmount =
@@ -288,13 +293,13 @@ router.patch(
         });
       }
 
-      // Make sure rental belongs to owner's equipment
-      if (
-        !rental.equipment.owner ||
-        String(
-          rental.equipment.owner
-        ) !== String(req.user._id)
-      ) {
+      // Make sure rental belongs to owner's equipment or user is admin
+      const isOwner =
+        rental.equipment.owner &&
+        String(rental.equipment.owner) === String(req.user._id);
+      const isAdmin = req.user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
         return res.status(403).json({
           message:
             "You can only manage rental requests for your own equipment",
@@ -311,14 +316,6 @@ router.patch(
           return res.status(400).json({
             message:
               "Only pending rentals can be approved",
-          });
-        }
-
-        // Equipment must be available
-        if (!rental.equipment.available) {
-          return res.status(400).json({
-            message:
-              "This equipment is currently unavailable",
           });
         }
 

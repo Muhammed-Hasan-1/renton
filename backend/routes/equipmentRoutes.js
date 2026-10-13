@@ -147,11 +147,11 @@ router.delete(
         });
       }
 
-      // Check ownership
-      if (
-        !equipment.owner ||
-        String(equipment.owner) !== String(req.user._id)
-      ) {
+      // Check ownership or admin status
+      const isOwner = equipment.owner && String(equipment.owner) === String(req.user._id);
+      const isAdmin = req.user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
         return res.status(403).json({
           message: "You can only delete your own equipment",
         });
@@ -212,11 +212,11 @@ router.put(
         });
       }
 
-      // Make sure this equipment belongs to the logged-in owner
-      if (
-        !equipment.owner ||
-        String(equipment.owner) !== String(req.user._id)
-      ) {
+      // Make sure this equipment belongs to the logged-in owner or admin
+      const isOwner = equipment.owner && String(equipment.owner) === String(req.user._id);
+      const isAdmin = req.user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
         return res.status(403).json({
           message: "You can only edit your own equipment",
         });
@@ -271,11 +271,11 @@ router.patch(
         });
       }
 
-      // Check ownership
-      if (
-        !equipment.owner ||
-        String(equipment.owner) !== String(req.user._id)
-      ) {
+      // Check ownership or admin status
+      const isOwner = equipment.owner && String(equipment.owner) === String(req.user._id);
+      const isAdmin = req.user.role === "admin";
+
+      if (!isOwner && !isAdmin) {
         return res.status(403).json({
           message: "You can only manage your own equipment",
         });
