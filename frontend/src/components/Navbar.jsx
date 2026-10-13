@@ -1,16 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getToken, clearSession } from "../services/auth";
 
 export default function Navbar() {
   const location = useLocation();
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!localStorage.getItem("rentonToken");
+    return !!getToken();
   });
 
   // Check authentication whenever the route changes
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("rentonToken"));
+    setIsLoggedIn(!!getToken());
   }, [location.pathname]);
 
   const navItems = [
@@ -35,6 +36,12 @@ export default function Navbar() {
       path: "/feedback",
     },
   ];
+
+  const handleSignOut = () => {
+    clearSession();
+    setIsLoggedIn(false);
+    window.location.href = "/";
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-emerald-100 bg-white/90 shadow-lg shadow-emerald-100/50 backdrop-blur-xl">
@@ -131,12 +138,21 @@ export default function Navbar() {
 
           {/* Logged in */}
           {isLoggedIn && (
-            <Link
-              to="/profile"
-              className="rounded-xl bg-emerald-100 px-6 py-3 text-lg font-semibold text-emerald-700 transition-all duration-300 hover:-translate-y-1 hover:bg-emerald-200"
-            >
-              My Profile
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/profile"
+                className="rounded-xl bg-emerald-100 px-5 py-2.5 text-base font-semibold text-emerald-700 transition-all duration-300 hover:bg-emerald-200"
+              >
+                My Profile
+              </Link>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="rounded-xl border border-red-200 bg-red-50 px-5 py-2.5 text-base font-semibold text-red-600 transition-all duration-300 hover:bg-red-100 hover:text-red-700 cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
           )}
 
         </div>

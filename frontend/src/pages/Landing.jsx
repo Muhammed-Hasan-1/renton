@@ -1,7 +1,32 @@
-// import Navbar from "../components/Navbar";
-// import Footer from "../components/Footer";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
+import { getToken } from "../services/auth";
+import API from "../services/api";
+
 export default function Landing() {
+  const token = getToken();
+  const [featuredEquipment, setFeaturedEquipment] = useState([]);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const response = await API.get("/equipment");
+        const available = response.data.filter((item) => item.available);
+        setFeaturedEquipment(available.slice(0, 3));
+      } catch (err) {
+        console.error("Failed to fetch featured equipment:", err);
+      }
+    };
+
+    if (!token) {
+      fetchFeatured();
+    }
+  }, [token]);
+
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   const categories = [
     "Power Tools",
     "Construction",
@@ -9,24 +34,6 @@ export default function Landing() {
     "Painting",
     "Electrical",
     "Cleaning",
-  ];
-
-  const equipments = [
-    {
-      name: "Cordless Drill",
-      price: "₹300/day",
-      image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600",
-    },
-    {
-      name: "Angle Grinder",
-      price: "₹250/day",
-      image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600",
-    },
-    {
-      name: "Circular Saw",
-      price: "₹350/day",
-      image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600",
-    },
   ];
 
   return (
@@ -117,12 +124,13 @@ export default function Landing() {
           <div className="grid gap-8 md:grid-cols-3">
 
             {categories.map((category) => (
-              <div
+              <Link
                 key={category}
-                className="cursor-pointer rounded-2xl bg-white p-8 text-center shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+                to={`/equipment?category=${encodeURIComponent(category)}`}
+                className="group block cursor-pointer rounded-2xl bg-white p-8 text-center shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
               >
-                <h3 className="text-2xl font-semibold">{category}</h3>
-              </div>
+                <h3 className="text-2xl font-semibold group-hover:text-emerald-600 transition">{category}</h3>
+              </Link>
             ))}
 
           </div>
@@ -140,36 +148,53 @@ export default function Landing() {
 
           <div className="grid gap-8 md:grid-cols-3">
 
-            {equipments.map((item) => (
-              <div
-                key={item.name}
-                className="overflow-hidden rounded-3xl bg-white shadow-xl transition hover:-translate-y-3 hover:shadow-2xl"
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="h-64 w-full object-cover"
-                />
+            {featuredEquipment.length > 0 ? (
+              featuredEquipment.map((item) => (
+                <div
+                  key={item._id}
+                  className="overflow-hidden rounded-3xl bg-white shadow-xl transition hover:-translate-y-3 hover:shadow-2xl flex flex-col justify-between"
+                >
+                  <div>
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-64 w-full object-cover"
+                    />
 
-                <div className="p-6">
+                    <div className="p-6">
+                      <p className="text-sm font-semibold text-emerald-600 uppercase tracking-wide">
+                        {item.category}
+                      </p>
+                      <h3 className="mt-1 text-2xl font-bold text-slate-800">
+                        {item.name}
+                      </h3>
 
-                  <h3 className="text-2xl font-bold">
-                    {item.name}
-                  </h3>
+                      <p className="mt-2 text-xl font-bold text-emerald-600">
+                        ₹{item.pricePerDay}/day
+                      </p>
+                    </div>
+                  </div>
 
-                  <p className="mt-2 text-lg text-emerald-600">
-                    {item.price}
-                  </p>
-
-                  <Link
-                    to="/equipment"
-                    className="mt-6 block w-full rounded-xl bg-emerald-600 py-3 text-center font-semibold text-white transition hover:bg-emerald-700"
-                  >
-                    Rent Now
-                  </Link>
+                  <div className="p-6 pt-0">
+                    <Link
+                      to={`/equipment/${item._id}`}
+                      className="block w-full rounded-xl bg-emerald-600 py-3 text-center font-semibold text-white transition hover:bg-emerald-700"
+                    >
+                      View & Rent
+                    </Link>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-10 text-slate-500">
+                <Link
+                  to="/equipment"
+                  className="inline-block rounded-xl bg-emerald-600 px-8 py-4 font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Browse Full Catalog
+                </Link>
               </div>
-            ))}
+            )}
 
           </div>
 

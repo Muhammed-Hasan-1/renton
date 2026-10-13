@@ -1,15 +1,16 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getToken } from "../services/auth";
 
 export default function Footer() {
   const location = useLocation();
 
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!localStorage.getItem("rentonToken");
+    return !!getToken();
   });
 
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("rentonToken"));
+    setIsLoggedIn(!!getToken());
   }, [location.pathname]);
 
   return (

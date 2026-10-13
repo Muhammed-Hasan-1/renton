@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
+import { getToken, getUser } from "../services/auth";
 
 function Feedback() {
   const [formData, setFormData] = useState({
@@ -16,7 +17,7 @@ function Feedback() {
   const [myFeedback, setMyFeedback] = useState([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("rentonToken");
+    const token = getToken();
 
     if (token) {
       loadMyFeedback();
@@ -25,38 +26,19 @@ function Feedback() {
   }, []);
 
   const loadUserDetails = () => {
-    try {
-      const storedUser = JSON.parse(
-        localStorage.getItem("rentonUser") || "{}"
-      );
-
+    const storedUser = getUser();
+    if (storedUser) {
       setFormData((prev) => ({
         ...prev,
         name: storedUser.name || "",
         email: storedUser.email || "",
       }));
-    } catch (err) {
-      console.error("Failed to load user details:", err);
     }
   };
 
   const loadMyFeedback = async () => {
     try {
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        return;
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/feedback/my",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await API.get("/feedback/my");
       setMyFeedback(response.data.feedback || []);
     } catch (err) {
       console.error("Failed to load feedback:", err);
@@ -81,28 +63,13 @@ function Feedback() {
     setSubmitted(false);
     setError("");
 
-    const token = localStorage.getItem("rentonToken");
-
-    if (!token) {
-      setError("Please sign in before submitting feedback.");
-      return;
-    }
-
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/feedback",
-        {
-          rating: formData.rating,
-          message: formData.message,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.post("/feedback", {
+        rating: formData.rating,
+        message: formData.message,
+      });
 
       setSubmitted(true);
 

@@ -1,6 +1,23 @@
+import { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) return;
+    setSubmitted(true);
+    setFormData({ name: "", email: "", subject: "", message: "" });
+    setTimeout(() => setSubmitted(false), 5000);
+  };
+
   return (
     <section
       id="contact"
@@ -86,34 +103,52 @@ export default function Contact() {
               Send a Message
             </h3>
 
-            <form className="space-y-6">
+            {submitted && (
+              <div className="mb-6 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-700 font-semibold">
+                Thank you! Your message has been sent successfully.
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
 
               <input
                 type="text"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Your Name"
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
 
               <input
                 type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="Email Address"
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
 
               <input
                 type="text"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 placeholder="Subject"
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
 
               <textarea
                 rows="5"
+                required
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Write your message..."
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               ></textarea>
 
               <button
-                className="w-full rounded-xl bg-emerald-600 py-4 text-lg font-semibold text-white transition duration-300 hover:-translate-y-1 hover:bg-emerald-700 hover:shadow-xl"
+                type="submit"
+                className="w-full rounded-xl bg-emerald-600 py-4 text-lg font-semibold text-white transition duration-300 hover:-translate-y-1 hover:bg-emerald-700 hover:shadow-xl cursor-pointer"
               >
                 Send Message
               </button>
