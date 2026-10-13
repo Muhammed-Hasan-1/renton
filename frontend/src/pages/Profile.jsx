@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
+import { clearSession, getUser } from "../services/auth";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -32,22 +33,7 @@ export default function Profile() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await API.get("/users/me");
       const user = response.data.user;
 
       setFormData({
@@ -67,8 +53,7 @@ export default function Profile() {
       console.error("Profile loading error:", err);
 
       if (err.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }
@@ -101,29 +86,11 @@ export default function Profile() {
       setMessage("");
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
-      const response = await axios.put(
-        "http://localhost:5000/api/users/me",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await API.put("/users/me", formData);
       const updatedUser = response.data.user;
 
-      // Keep localStorage user information in sync
-      const storedUser = JSON.parse(
-        localStorage.getItem("rentonUser") || "{}"
-      );
+      // Keep user information in sync
+      const storedUser = getUser() || {};
 
       const updatedLocalUser = {
         ...storedUser,
@@ -134,7 +101,7 @@ export default function Profile() {
         role: updatedUser.role,
       };
 
-      localStorage.setItem(
+      sessionStorage.setItem(
         "rentonUser",
         JSON.stringify(updatedLocalUser)
       );
@@ -158,8 +125,7 @@ export default function Profile() {
       console.error("Profile update error:", err);
 
       if (err.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }

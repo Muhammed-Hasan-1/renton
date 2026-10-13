@@ -1,9 +1,15 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
+import API from "../services/api";
+import { getToken } from "../services/auth";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const token = getToken();
+
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -52,8 +58,8 @@ const handleSubmit = async (e) => {
   try {
     setLoading(true);
 
-    const response = await axios.post(
-      "http://localhost:5000/api/auth/register",
+    const response = await API.post(
+      "/auth/register",
       {
         name: formData.fullName,
         email: formData.email,
@@ -67,7 +73,7 @@ const handleSubmit = async (e) => {
         pincode: formData.pincode,
 
         password: formData.password,
-        role: formData.role,
+        role: formData.role === "Equipment Owner" ? "owner" : "customer",
       }
     );
 
@@ -159,7 +165,7 @@ const handleSubmit = async (e) => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                placeholder="Muhammed Hasan"
+                placeholder="Enter full name"
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
               />
             </div>
@@ -176,7 +182,7 @@ const handleSubmit = async (e) => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="example@gmail.com"
+                placeholder="you@example.com"
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
               />
             </div>
@@ -193,7 +199,7 @@ const handleSubmit = async (e) => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="9876543210"
+                placeholder="Enter phone number"
                 className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
               />
             </div>
@@ -244,7 +250,7 @@ const handleSubmit = async (e) => {
                   name="state"
                   value={formData.state}
                   onChange={handleChange}
-                  placeholder="Kerala"
+                  placeholder="State"
                   className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>
@@ -259,7 +265,7 @@ const handleSubmit = async (e) => {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  placeholder="Malappuram"
+                  placeholder="District"
                   className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>
@@ -280,7 +286,7 @@ const handleSubmit = async (e) => {
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  placeholder="Perinthalmanna"
+                  placeholder="City"
                   className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>
@@ -295,7 +301,7 @@ const handleSubmit = async (e) => {
                   name="pincode"
                   value={formData.pincode}
                   onChange={handleChange}
-                  placeholder="679322"
+                  placeholder="Pincode"
                   className="w-full rounded-xl border border-gray-300 px-5 py-4 outline-none transition-all duration-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>

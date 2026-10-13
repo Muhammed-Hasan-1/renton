@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import API from "../services/api";
+import { getToken, setSession } from "../services/auth";
 import "../styles/SignIn.css";
 
 function SignIn() {
   const navigate = useNavigate();
+  const token = getToken();
+
+  if (token) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const [formData, setFormData] = useState({
     email: "",
@@ -29,22 +35,13 @@ function SignIn() {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+      const response = await API.post(
+        "/auth/login",
         formData
       );
 
-      // Save JWT
-      localStorage.setItem(
-        "rentonToken",
-        response.data.token
-      );
-
-      // Save user information
-      localStorage.setItem(
-        "rentonUser",
-        JSON.stringify(response.data.user)
-      );
+      // Save session (tab-scoped)
+      setSession(response.data.token, response.data.user);
 
       // Go to dashboard
       navigate("/dashboard");
