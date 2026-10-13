@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
 
 function EditEquipment() {
   const { id } = useParams();
@@ -32,17 +32,8 @@ function EditEquipment() {
   // Load equipment
   useEffect(() => {
     const fetchEquipment = async () => {
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/equipment/${id}`
-        );
+        const response = await API.get(`/equipment/${id}`);
 
         const equipment = response.data;
 
@@ -81,34 +72,19 @@ function EditEquipment() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const token = localStorage.getItem("rentonToken");
-
-    if (!token) {
-      navigate("/signin");
-      return;
-    }
-
     try {
       setSaving(true);
       setError("");
       setSuccess("");
 
-      const response = await axios.put(
-        `http://localhost:5000/api/equipment/${id}`,
-        {
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          category: formData.category,
-          pricePerDay: Number(formData.pricePerDay),
-          location: formData.location.trim(),
-          image: formData.image.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.put(`/equipment/${id}`, {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        category: formData.category,
+        pricePerDay: Number(formData.pricePerDay),
+        location: formData.location.trim(),
+        image: formData.image.trim(),
+      });
 
       setSuccess(
         response.data.message ||

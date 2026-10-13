@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
+import { getUser, clearSession } from "../services/auth";
 
 function Inventory() {
   const navigate = useNavigate();
@@ -29,30 +30,12 @@ function Inventory() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-      const storedUser = localStorage.getItem("rentonUser");
-
-      if (!token) {
-        navigate("/signin");
-        return;
+      const currentUser = getUser();
+      if (currentUser) {
+        setUser(currentUser);
       }
 
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch {
-          localStorage.removeItem("rentonUser");
-        }
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/inventory",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.get("/inventory");
 
       setInventory(response.data.inventory || []);
       setSummary(
@@ -68,8 +51,7 @@ function Inventory() {
       console.error("Inventory loading error:", error);
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }

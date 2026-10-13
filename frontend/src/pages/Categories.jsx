@@ -1,27 +1,35 @@
+import { Link } from "react-router-dom";
+
 const categories = [
   {
     name: "Power Tools",
     description: "Drills, grinders and other electric tools.",
+    icon: "⚡",
   },
   {
     name: "Construction",
     description: "Professional equipment for construction work.",
+    icon: "🏗️",
   },
   {
     name: "Gardening",
     description: "Equipment for gardening and outdoor work.",
+    icon: "🌱",
   },
   {
     name: "Painting",
     description: "Sprayers, rollers and painting equipment.",
+    icon: "🎨",
   },
   {
     name: "Electrical",
     description: "Electrical tools and testing equipment.",
+    icon: "🔌",
   },
   {
     name: "Cleaning",
     description: "Pressure washers and cleaning equipment.",
+    icon: "🧹",
   },
 ];
 
@@ -50,16 +58,17 @@ function Categories() {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 
           {categories.map((category) => (
-            <div
+            <Link
               key={category.name}
-              className="cursor-pointer rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
+              to={`/equipment?category=${encodeURIComponent(category.name)}`}
+              className="group block cursor-pointer rounded-3xl bg-white p-8 shadow-lg transition hover:-translate-y-2 hover:shadow-2xl"
             >
 
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-2xl">
-                🔧
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-2xl transition group-hover:scale-110">
+                {category.icon}
               </div>
 
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-slate-800 group-hover:text-emerald-700 transition">
                 {category.name}
               </h2>
 
@@ -67,11 +76,11 @@ function Categories() {
                 {category.description}
               </p>
 
-              <p className="mt-5 font-semibold text-emerald-600">
+              <p className="mt-5 font-semibold text-emerald-600 flex items-center gap-1 group-hover:translate-x-1 transition">
                 Explore →
               </p>
 
-            </div>
+            </Link>
           ))}
 
         </div>

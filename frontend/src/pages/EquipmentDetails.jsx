@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
 
 function EquipmentDetails() {
   const { id } = useParams();
@@ -15,9 +15,7 @@ function EquipmentDetails() {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(
-          `http://localhost:5000/api/equipment/${id}`
-        );
+        const response = await API.get(`/equipment/${id}`);
 
         setEquipment(response.data);
       } catch (error) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
 
 function MyEquipment() {
   const [equipments, setEquipments] = useState([]);
@@ -11,30 +11,14 @@ function MyEquipment() {
 
   useEffect(() => {
     const fetchMyEquipment = async () => {
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
       try {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(
-          "http://localhost:5000/api/equipment/my-equipment",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        const response = await API.get("/equipment/my-equipment");
         setEquipments(response.data);
       } catch (error) {
         console.error("Failed to load my equipment:", error);
-
         setError(
           error.response?.data?.message ||
             "Unable to load your equipment."
@@ -58,76 +42,48 @@ function MyEquipment() {
   }
 
   const handleDelete = async (equipmentId, equipmentName) => {
-  const confirmed = window.confirm(
-    `Are you sure you want to delete "${equipmentName}"?`
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  const token = localStorage.getItem("rentonToken");
-
-  if (!token) {
-    navigate("/signin");
-    return;
-  }
-
-  try {
-    await axios.delete(
-      `http://localhost:5000/api/equipment/${equipmentId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${equipmentName}"?`
     );
 
-    // Remove deleted equipment from the screen
-    setEquipments((previous) =>
-      previous.filter(
-        (equipment) => equipment._id !== equipmentId
-      )
-    );
-  } catch (error) {
-    console.error("Delete equipment error:", error);
+    if (!confirmed) {
+      return;
+    }
 
-    setError(
-      error.response?.data?.message ||
-        "Failed to delete equipment."
-    );
-  }
-};
+    try {
+      await API.delete(`/equipment/${equipmentId}`);
 
-const handleAvailabilityToggle = async (
-  equipmentId,
-  currentAvailability
-) => {
-  const token = localStorage.getItem("rentonToken");
+      // Remove deleted equipment from the screen
+      setEquipments((previous) =>
+        previous.filter(
+          (equipment) => equipment._id !== equipmentId
+        )
+      );
+    } catch (error) {
+      console.error("Delete equipment error:", error);
 
-  if (!token) {
-    navigate("/signin");
-    return;
-  }
+      setError(
+        error.response?.data?.message ||
+          "Failed to delete equipment."
+      );
+    }
+  };
 
-  try {
-    setError("");
+  const handleAvailabilityToggle = async (
+    equipmentId,
+    currentAvailability
+  ) => {
+    try {
+      setError("");
 
-    const response = await axios.patch(
-      `http://localhost:5000/api/equipment/${equipmentId}/availability`,
-      {
-        available: !currentAvailability,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      const response = await API.patch(
+        `/equipment/${equipmentId}/availability`,
+        { available: !currentAvailability }
+      );
 
-    // Update the equipment immediately on the page
-    setEquipments((previous) =>
-      previous.map((equipment) =>
+      // Update the equipment immediately on the page
+      setEquipments((previous) =>
+        previous.map((equipment) =>
         equipment._id === equipmentId
           ? response.data.equipment
           : equipment

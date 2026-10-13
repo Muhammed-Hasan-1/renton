@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
 
 function AddEquipment() {
   const navigate = useNavigate();
@@ -42,32 +42,17 @@ function AddEquipment() {
     setError("");
     setSuccess("");
 
-    const token = localStorage.getItem("rentonToken");
-
-    if (!token) {
-      navigate("/signin");
-      return;
-    }
-
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/equipment",
-        {
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          category: formData.category,
-          pricePerDay: Number(formData.pricePerDay),
-          location: formData.location.trim(),
-          image: formData.image.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.post("/equipment", {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        category: formData.category,
+        pricePerDay: Number(formData.pricePerDay),
+        location: formData.location.trim(),
+        image: formData.image.trim(),
+      });
 
       setSuccess(
         response.data.message || "Equipment added successfully."

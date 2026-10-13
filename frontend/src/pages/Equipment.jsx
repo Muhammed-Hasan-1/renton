@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
-
-
+import { Link, useSearchParams } from "react-router-dom";
+import API from "../services/api";
 
 const categories = [
   "All Categories",
@@ -15,34 +13,25 @@ const categories = [
 ];
 
 function Equipment() {
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get("category") || "All Categories";
+
   const [equipments, setEquipments] = useState([]);
-
   const [search, setSearch] = useState("");
-
-  const [category, setCategory] = useState("All Categories");
-
+  const [category, setCategory] = useState(initialCategory);
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
-    useEffect(() => {
+
+  useEffect(() => {
     const fetchEquipment = async () => {
       try {
         setLoading(true);
         setError("");
-
-        const response = await axios.get(
-          "http://localhost:5000/api/equipment"
-        );
-
+        const response = await API.get("/equipment");
         setEquipments(response.data);
-
-      } catch (error) {
-        console.error("Failed to load equipment:", error);
-
-        setError(
-          "Unable to load equipment. Please try again."
-        );
-
+      } catch (err) {
+        console.error("Failed to load equipment:", err);
+        setError("Unable to load equipment. Please try again.");
       } finally {
         setLoading(false);
       }
