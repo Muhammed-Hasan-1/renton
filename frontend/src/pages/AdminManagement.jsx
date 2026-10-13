@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
+import { clearSession } from "../services/auth";
 
 export default function AdminManagement() {
   const navigate = useNavigate();
@@ -29,30 +30,12 @@ export default function AdminManagement() {
     loadEquipment();
   }, []);
 
-  const getToken = () => {
-    return localStorage.getItem("rentonToken");
-  };
-
   const loadEquipment = async () => {
     try {
       setLoadingEquipment(true);
       setError("");
 
-      const token = getToken();
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/admin/management/equipment",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.get("/admin/management/equipment");
 
       setEquipment(response.data.equipment || []);
     } catch (error) {
@@ -62,8 +45,7 @@ export default function AdminManagement() {
       );
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }
@@ -82,21 +64,7 @@ export default function AdminManagement() {
       setLoadingRentals(true);
       setError("");
 
-      const token = getToken();
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/admin/management/rentals",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.get("/admin/management/rentals");
 
       setRentals(response.data.rentals || []);
     } catch (error) {
@@ -106,8 +74,7 @@ export default function AdminManagement() {
       );
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }
@@ -149,16 +116,7 @@ export default function AdminManagement() {
       setEquipmentAction(equipmentId);
       setError("");
 
-      const token = getToken();
-
-      await axios.delete(
-        `http://localhost:5000/api/admin/management/equipment/${equipmentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await API.delete(`/admin/management/equipment/${equipmentId}`);
 
       setEquipment((prev) =>
         prev.filter(
@@ -188,18 +146,9 @@ export default function AdminManagement() {
       setRentalAction(`${rentalId}-${status}`);
       setError("");
 
-      const token = getToken();
-
-      const response = await axios.patch(
-        `http://localhost:5000/api/admin/management/rentals/${rentalId}/status`,
-        {
-          status,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await API.patch(
+        `/admin/management/rentals/${rentalId}/status`,
+        { status }
       );
 
       setRentals((prev) =>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
 
 function RentEquipment() {
   const { id } = useParams();
@@ -28,22 +28,11 @@ function RentEquipment() {
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/equipment/${id}`
-        );
-
+        const response = await API.get(`/equipment/${id}`);
         setEquipment(response.data);
-
       } catch (error) {
-        console.error(
-          "Failed to load equipment:",
-          error
-        );
-
-        setError(
-          "Unable to load equipment."
-        );
-
+        console.error("Failed to load equipment:", error);
+        setError("Unable to load equipment.");
       } finally {
         setLoading(false);
       }
@@ -73,26 +62,13 @@ function RentEquipment() {
       return;
     }
 
-    const millisecondsPerDay =
-      1000 * 60 * 60 * 24;
-
-    const days =
-      Math.ceil(
-        (end - start) /
-          millisecondsPerDay
-      ) || 1;
+    const startUtc = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const endUtc = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+    const days = Math.floor((endUtc - startUtc) / (1000 * 60 * 60 * 24)) + 1;
 
     setTotalDays(days);
-
-    setTotalAmount(
-      days * equipment.pricePerDay
-    );
-
-  }, [
-    startDate,
-    endDate,
-    equipment,
-  ]);
+    setTotalAmount(days * equipment.pricePerDay);
+  }, [startDate, endDate, equipment]);
 
 
   // ===============================
@@ -105,52 +81,26 @@ function RentEquipment() {
     setError("");
     setSuccess("");
 
-    const token =
-      localStorage.getItem(
-        "rentonToken"
-      );
-
-    if (!token) {
-      navigate("/signin");
-      return;
-    }
-
     if (!startDate || !endDate) {
-      setError(
-        "Please select both rental dates."
-      );
+      setError("Please select both rental dates.");
       return;
     }
 
     if (totalDays <= 0) {
-      setError(
-        "Please select valid rental dates."
-      );
+      setError("Please select valid rental dates.");
       return;
     }
 
     try {
       setBooking(true);
 
-      const response =
-        await axios.post(
-          "http://localhost:5000/api/rentals",
-          {
-            equipmentId: id,
-            startDate,
-            endDate,
-          },
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
+      const response = await API.post("/rentals", {
+        equipmentId: id,
+        startDate,
+        endDate,
+      });
 
-      setSuccess(
-        response.data.message
-      );
+      setSuccess(response.data.message);
 
       setTimeout(() => {
         navigate("/dashboard");

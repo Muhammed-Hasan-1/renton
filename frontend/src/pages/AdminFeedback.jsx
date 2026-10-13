@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
+import { clearSession } from "../services/auth";
 
 export default function AdminFeedback() {
   const navigate = useNavigate();
@@ -17,29 +18,14 @@ export default function AdminFeedback() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/feedback/all",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.get("/feedback/all");
 
       setFeedback(response.data.feedback || []);
     } catch (error) {
       console.error("Load admin feedback error:", error);
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }
@@ -84,16 +70,7 @@ export default function AdminFeedback() {
       setDeletingId(feedbackId);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      await axios.delete(
-        `http://localhost:5000/api/feedback/${feedbackId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await API.delete(`/feedback/${feedbackId}`);
 
       setFeedback((prev) =>
         prev.filter((item) => item._id !== feedbackId)

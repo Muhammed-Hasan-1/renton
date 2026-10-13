@@ -1,6 +1,34 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 function Booking() {
+  const navigate = useNavigate();
+  const [equipmentList, setEquipmentList] = useState([]);
+  const [selectedId, setSelectedId] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEquipment = async () => {
+      try {
+        const response = await API.get("/equipment");
+        setEquipmentList(response.data);
+      } catch (err) {
+        console.error("Failed to load equipment list:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEquipment();
+  }, []);
+
+  const handleProceed = (e) => {
+    e.preventDefault();
+    if (selectedId) {
+      navigate(`/equipment/${selectedId}/rent`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-16">
       <div className="mx-auto max-w-6xl">
@@ -23,63 +51,46 @@ function Booking() {
             Start a Booking
           </h2>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <form onSubmit={handleProceed} className="mt-8 space-y-6">
 
             <div>
-              <label className="mb-2 block font-semibold">
-                Equipment
+              <label className="mb-2 block font-semibold text-slate-700">
+                Select Equipment
               </label>
 
-              <select className="w-full rounded-xl border border-slate-300 px-4 py-3">
-                <option>Select equipment</option>
-                <option>Cordless Drill</option>
-                <option>Angle Grinder</option>
-                <option>Circular Saw</option>
+              <select
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                required
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+              >
+                <option value="">Select equipment from catalog...</option>
+                {equipmentList.map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.name} - ₹{item.pricePerDay}/day ({item.location})
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div>
-              <label className="mb-2 block font-semibold">
-                Location
-              </label>
+            <div className="flex gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={!selectedId || loading}
+                className="rounded-xl bg-emerald-600 px-8 py-4 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+              >
+                Proceed to Booking
+              </button>
 
-              <input
-                type="text"
-                placeholder="Enter location"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-              />
+              <Link
+                to="/equipment"
+                className="rounded-xl border border-slate-300 bg-white px-8 py-4 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Browse Catalog
+              </Link>
             </div>
 
-            <div>
-              <label className="mb-2 block font-semibold">
-                Start Date
-              </label>
-
-              <input
-                type="date"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block font-semibold">
-                End Date
-              </label>
-
-              <input
-                type="date"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-              />
-            </div>
-
-          </div>
-
-          <Link
-            to="/equipment"
-            className="mt-8 inline-block rounded-xl bg-emerald-600 px-8 py-4 font-semibold text-white transition hover:bg-emerald-700"
-          >
-            Browse Equipment
-          </Link>
+          </form>
 
         </div>
       </div>

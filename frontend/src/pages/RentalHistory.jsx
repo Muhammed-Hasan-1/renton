@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 
 function RentalHistory() {
@@ -16,41 +16,18 @@ function RentalHistory() {
 
   useEffect(() => {
     const fetchRentals = async () => {
-      const token =
-        localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
       try {
         setLoading(true);
         setError("");
 
-        const response = await axios.get(
-          "http://localhost:5000/api/rentals/my",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
+        const response = await API.get("/rentals/my");
         setRentals(response.data);
-
       } catch (error) {
-        console.error(
-          "Failed to fetch rental history:",
-          error
-        );
-
+        console.error("Failed to fetch rental history:", error);
         setError(
           error.response?.data?.message ||
             "Unable to load your rental history."
         );
-
       } finally {
         setLoading(false);
       }

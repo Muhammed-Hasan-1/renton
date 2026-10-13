@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
 
 function OwnerRentalRequests() {
   const navigate = useNavigate();
@@ -17,40 +17,19 @@ function OwnerRentalRequests() {
   // ======================================================
 
   const fetchRentalRequests = async () => {
-    const token =
-      localStorage.getItem("rentonToken");
-
-    if (!token) {
-      navigate("/signin");
-      return;
-    }
-
     try {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(
-        "http://localhost:5000/api/rentals/owner",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await API.get("/rentals/owner");
       setRentals(response.data);
 
     } catch (error) {
-      console.error(
-        "Failed to load rental requests:",
-        error
-      );
-
+      console.error("Failed to load rental requests:", error);
       setError(
         error.response?.data?.message ||
           "Unable to load rental requests."
       );
-
     } finally {
       setLoading(false);
     }
@@ -70,19 +49,7 @@ function OwnerRentalRequests() {
   // UPDATE RENTAL STATUS
   // ======================================================
 
-  const handleStatusChange = async (
-    rentalId,
-    newStatus
-  ) => {
-    const token =
-      localStorage.getItem("rentonToken");
-
-    if (!token) {
-      navigate("/signin");
-      return;
-    }
-
-
+  const handleStatusChange = async (rentalId, newStatus) => {
     let actionText = "";
 
     if (newStatus === "confirmed") {
@@ -111,20 +78,10 @@ function OwnerRentalRequests() {
       setError("");
       setSuccess("");
 
-
-      const response =
-        await axios.patch(
-          `http://localhost:5000/api/rentals/${rentalId}/status`,
-          {
-            status: newStatus,
-          },
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
+      const response = await API.patch(
+        `/rentals/${rentalId}/status`,
+        { status: newStatus }
+      );
 
 
       setRentals((previous) =>

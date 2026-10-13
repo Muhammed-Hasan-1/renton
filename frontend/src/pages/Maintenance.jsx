@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
+import { getUser, clearSession } from "../services/auth";
 
 function Maintenance() {
   const navigate = useNavigate();
@@ -41,33 +42,12 @@ function Maintenance() {
       setLoading(true);
       setError("");
 
-      const token =
-        localStorage.getItem("rentonToken");
-
-      const storedUser =
-        localStorage.getItem("rentonUser");
-
-      if (!token) {
-        navigate("/signin");
-        return;
+      const currentUser = getUser();
+      if (currentUser) {
+        setUser(currentUser);
       }
 
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch {
-          localStorage.removeItem("rentonUser");
-        }
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/maintenance",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await API.get("/maintenance");
 
       setMaintenance(
         response.data.maintenance || []
@@ -90,8 +70,7 @@ function Maintenance() {
       );
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }
@@ -160,17 +139,9 @@ function Maintenance() {
       setSaving(true);
       setError("");
 
-      const token =
-        localStorage.getItem("rentonToken");
-
-      await axios.put(
-        `http://localhost:5000/api/maintenance/${editingEquipment.equipment._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      await API.put(
+        `/maintenance/${editingEquipment.equipment._id}`,
+        formData
       );
 
       closeEditor();
@@ -202,17 +173,7 @@ function Maintenance() {
     try {
       setError("");
 
-      const token =
-        localStorage.getItem("rentonToken");
-
-      await axios.delete(
-        `http://localhost:5000/api/maintenance/${equipmentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await API.delete(`/maintenance/${equipmentId}`);
 
       await loadMaintenance();
     } catch (error) {

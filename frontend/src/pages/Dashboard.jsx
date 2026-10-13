@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
+import { getToken, getUser, clearSession } from "../services/auth";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -50,25 +51,19 @@ function Dashboard() {
   // ======================================================
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("rentonUser");
-    const token = localStorage.getItem("rentonToken");
+    const token = getToken();
+    const currentUser = getUser();
 
     if (!token) {
       navigate("/signin");
       return;
     }
 
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Failed to read logged-in user:", error);
-
-        localStorage.removeItem("rentonUser");
-        localStorage.removeItem("rentonToken");
-
-        navigate("/signin");
-      }
+    if (currentUser) {
+      setUser(currentUser);
+    } else {
+      clearSession();
+      navigate("/signin");
     }
   }, [navigate]);
 
@@ -92,71 +87,26 @@ function Dashboard() {
     }
 
     const fetchOwnerStats = async () => {
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
       try {
         setStatsLoading(true);
         setStatsError("");
 
         const [equipmentResponse, rentalsResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/equipment/my-equipment", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-
-          axios.get("http://localhost:5000/api/rentals/owner", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
+          API.get("/equipment/my-equipment"),
+          API.get("/rentals/owner"),
         ]);
 
         const equipments = equipmentResponse.data || [];
-
         const rentals = rentalsResponse.data || [];
 
-        // Equipment statistics
-        const totalEquipment = equipments.length;
-
-        const availableEquipment = equipments.filter(
-          (equipment) => equipment.available === true,
-        ).length;
-
-        const unavailableEquipment = equipments.filter(
-          (equipment) => equipment.available === false,
-        ).length;
-
-        // Rental statistics
-        const pendingRequests = rentals.filter(
-          (rental) => rental.status === "pending",
-        ).length;
-
-        const confirmedRentals = rentals.filter(
-          (rental) => rental.status === "confirmed",
-        ).length;
-
-        const activeRentals = rentals.filter(
-          (rental) => rental.status === "active",
-        ).length;
-
-        const completedRentals = rentals.filter(
-          (rental) => rental.status === "completed",
-        ).length;
-
         setOwnerStats({
-          totalEquipment,
-          availableEquipment,
-          unavailableEquipment,
-          pendingRequests,
-          confirmedRentals,
-          activeRentals,
-          completedRentals,
+          totalEquipment: equipments.length,
+          availableEquipment: equipments.filter((item) => item.available).length,
+          unavailableEquipment: equipments.filter((item) => !item.available).length,
+          pendingRequests: rentals.filter((item) => item.status === "pending").length,
+          confirmedRentals: rentals.filter((item) => item.status === "confirmed").length,
+          activeRentals: rentals.filter((item) => item.status === "active").length,
+          completedRentals: rentals.filter((item) => item.status === "completed").length,
         });
       } catch (error) {
         console.error("Failed to load owner statistics:", error);
@@ -182,25 +132,11 @@ function Dashboard() {
     }
 
     const fetchAdminStats = async () => {
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
       try {
         setStatsLoading(true);
         setStatsError("");
 
-        const response = await axios.get(
-          "http://localhost:5000/api/admin/stats",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        const response = await API.get("/admin/stats");
 
         setAdminStats(
           response.data.stats || {
@@ -247,9 +183,7 @@ function Dashboard() {
   // ======================================================
 
   const handleLogout = () => {
-    localStorage.removeItem("rentonToken");
-    localStorage.removeItem("rentonUser");
-
+    clearSession();
     navigate("/");
   };
 
@@ -359,13 +293,6 @@ function Dashboard() {
                 </span>
               </p>
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="rounded-xl border-2 border-red-500 px-6 py-3 font-semibold text-red-600 transition hover:bg-red-50"
-            >
-              Logout
-            </button>
           </div>
         </section>
 

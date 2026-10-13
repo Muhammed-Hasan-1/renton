@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../services/api";
+import { clearSession, getUser } from "../services/auth";
 
 export default function AdminUsers() {
   const navigate = useNavigate();
@@ -17,29 +18,13 @@ export default function AdminUsers() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
-
-      const response = await axios.get(
-        "http://localhost:5000/api/admin/users",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await API.get("/admin/users");
       setUsers(response.data.users || []);
     } catch (error) {
       console.error("Load users error:", error);
 
       if (error.response?.status === 401) {
-        localStorage.removeItem("rentonToken");
-        localStorage.removeItem("rentonUser");
+        clearSession();
         navigate("/signin");
         return;
       }
@@ -65,15 +50,8 @@ export default function AdminUsers() {
   }, []);
 
   const getCurrentUserId = () => {
-    try {
-      const storedUser = JSON.parse(
-        localStorage.getItem("rentonUser") || "{}"
-      );
-
-      return storedUser.id;
-    } catch {
-      return null;
-    }
+    const currentUser = getUser();
+    return currentUser ? currentUser.id || currentUser._id : null;
   };
 
   const handleRoleChange = async (userId, newRole) => {
@@ -87,19 +65,9 @@ export default function AdminUsers() {
       setActionLoading(`role-${userId}`);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      await axios.patch(
-        `http://localhost:5000/api/admin/users/${userId}/role`,
-        {
-          role: newRole,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await API.patch(`/admin/users/${userId}/role`, {
+        role: newRole,
+      });
 
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
@@ -142,16 +110,7 @@ export default function AdminUsers() {
       setActionLoading(`delete-${userId}`);
       setError("");
 
-      const token = localStorage.getItem("rentonToken");
-
-      await axios.delete(
-        `http://localhost:5000/api/admin/users/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await API.delete(`/admin/users/${userId}`);
 
       setUsers((prevUsers) =>
         prevUsers.filter((user) => user._id !== userId)
